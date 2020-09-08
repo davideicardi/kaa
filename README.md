@@ -24,8 +24,9 @@ TODO
 
 ## Credits
 
-- Avro
+- Avro: https://avro.apache.org/
   - Single object encoding: https://avro.apache.org/docs/current/spec.html#single_object_encoding
-- Avro4s
-- Kafka
+- Avro4s: https://github.com/sksamuel/avro4s
+- Kafka: https://kafka.apache.org/
 - Avro formats: https://gist.github.com/davideicardi/e8c5a69b98e2a0f18867b637069d03a9
+- Agile Lab Darwin for inspiration: https://github.com/agile-lab-dev/darwin
