@@ -15,6 +15,7 @@ val dependencies = Seq(
   "com.sksamuel.avro4s" %% "avro4s-core" % avro4sVersion,
   "com.sksamuel.avro4s" %% "avro4s-kafka" % avro4sVersion,
   "org.apache.kafka" % "kafka-clients" % kafkaVersion,
+  "com.github.blemale" %% "scaffeine" % "4.0.1",
 )
 
 lazy val KaaSchemaRegistry = project
