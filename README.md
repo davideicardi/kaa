@@ -2,10 +2,12 @@
 
 (KAfka Avro4s Schema Registry)
 
-Avro case class serializer with schemas persisted in Kafka.
+Avro serializer for case classes with schemas persisted in Kafka.
 It allows to easily share avro schemas across multiple applications and instances
-allowing schema evolution. Row-based AVRO format is used to reduce records size, only a schema id (hash)
-is persisted with the record.  
+allowing schema evolution.
+
+[Single object AVRO encoding](https://avro.apache.org/docs/current/spec.html#single_object_encoding) is used to reduce records size, only a schema id (hash)
+is persisted within the record.  
 
 ## Usage
 
@@ -14,17 +16,16 @@ TODO
 ## Internals
 
 Kaa is implemented as an extension of the Avro4s `GeneridSerde`.
-Every time a case class is serialized the schema hash is generated and stored inside Kafka.
-When record is deserilized the schema is extracted from Kafka and used for the deserialization.
-
-A Kafka consumer is used to reads all schemas that will be cached in memory.
+During serialization a schema hash is generated and stored inside Kafka (key=hash, value=schema).
+When deserializing the schema is retrieved from Kafka and used for the deserialization.
+A Kafka consumer reads all schemas that will be cached in memory.
 
 TODO
 
 ## Credits
 
 - Avro
-  - Avro row based format 
+  - Single object encoding: https://avro.apache.org/docs/current/spec.html#single_object_encoding
 - Avro4s
 - Kafka
- 
+- Avro formats: https://gist.github.com/davideicardi/e8c5a69b98e2a0f18867b637069d03a9
