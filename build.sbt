@@ -8,7 +8,7 @@ val avro4sVersion = "4.0.0"
 val kafkaVersion = "2.4.0" // NOTE: there is a dependencies to kafka also from avro4s-kafka
 
 val testDependencies = Seq(
-  "org.scalatest" %% "scalatest" % "3.2.0" % "test",
+  "org.scalatest" %% "scalatest" % "3.2.0" % "it,test",
 )
 
 val dependencies = Seq(
@@ -19,7 +19,9 @@ val dependencies = Seq(
 )
 
 lazy val KaaSchemaRegistry = project
+  .configs(IntegrationTest)
   .settings(
+    Defaults.itSettings,
     name := "KaaSchemaRegistry",
     commonSettings,
     libraryDependencies ++= testDependencies,
