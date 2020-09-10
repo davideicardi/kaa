@@ -9,16 +9,37 @@ It allows to easily share avro schemas across multiple applications and instance
 
 ## Usage
 
-TODO
+```scala
+// create the topic
+val admin = new KaaSchemaRegistryAdmin(brokers)
+if (!admin.topicExists()) admin.createTopic()
+
+val schemaRegistry = new KaaSchemaRegistry(brokers)
+try {
+    val serializerV1 = new AvroSingleObjectSerializer[SuperheroV1](schemaRegistry)
+
+    val bytesV1 = serializerV1.serialize(SuperheroV1("Spiderman"))
+
+    val result = serializerV1.deserialize(bytesV1)
+    println(result)
+} finally {
+    schemaRegistry.shutdown()
+}
+
+case class SuperheroV1(name: String)
+```
 
 ## Internals
 
-Kaa is implemented as an extension of the Avro4s `GeneridSerde`.
+Kaa provides essentially 3 features:
+
+- a simple embeddable schema registry, `KaaSchemaRegistry`, that read and write schemas to Kafka
+- an avro serializer/deserializer based on Avro4s, `AvroSingleObjectSerializer`, that internally uses `KaaSchemaRegistry`
+- an implementation of Kafka's `Serde[T]` based on `AvroSingleObjectSerializer`
+
 During serialization a schema hash is generated and stored inside Kafka (key=hash, value=schema).
 When deserializing the schema is retrieved from Kafka and used for the deserialization.
-A Kafka consumer reads all schemas that will be cached in memory.
-
-TODO
+An embedded Kafka consumer reads all schemas that will be cached in memory.
 
 ## Credits
 
