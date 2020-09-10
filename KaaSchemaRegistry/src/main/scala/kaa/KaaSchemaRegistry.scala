@@ -16,6 +16,10 @@ import org.apache.kafka.common.serialization.{LongDeserializer, StringDeserializ
 import org.apache.kafka.common.serialization.{LongSerializer, StringSerializer}
 import scala.concurrent.duration._
 import kaa.utils.Retry
+import java.util.concurrent.atomic.AtomicBoolean
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Await
 
 object KaaSchemaRegistry {
   val DEFAULT_TOPIC_NAME = "schemas-v1"
@@ -25,9 +29,9 @@ class KaaSchemaRegistry(
   brokers: String,
   topic: String = KaaSchemaRegistry.DEFAULT_TOPIC_NAME,
   cliendId: String = "KaaSchemaRegistry",
-  pollInterval: Duration = 1.second,
-  getRetries: Int = 10,
-  getRetryDelay: Duration = 1.second
+  pollInterval: Duration = 5.second,
+  getRetries: Int = 5,
+  getRetryDelay: Duration = 2.second
 ) extends SchemaRegistry {
 
   // TODO Eval to put this code inside an "init" function instead of here in the constructor
@@ -37,27 +41,26 @@ class KaaSchemaRegistry(
     = new KafkaConsumer(createConsumerConfig(), new LongDeserializer(), new StringDeserializer())
   private var executor: ExecutorService = null
   private val cache: Cache[Long, String] = Scaffeine().build[Long, String]()
-  consumer.subscribe(Collections.singletonList(topic))
-  // TODO eval alternative for this executor
-  executor = Executors.newSingleThreadExecutor
-  executor.execute(new Runnable {
-    override def run(): Unit = {
+  private val stopping = new AtomicBoolean(false)
+  implicit private val ec = ExecutionContext.global
+  private val subscriber = Future {
+    consumer.subscribe(Collections.singletonList(topic))
       val jPollInterval = JavaDuration.ofMillis(pollInterval.toMillis)
-      while (true) {
+      while (!stopping.get()) {
         val records = consumer.poll(jPollInterval)
 
         records.forEach((record) => {
           cache.put(record.key(), record.value())
         })
       }
-    }
-  })
+
+      consumer.close();
+  }
 
   // TODO eval if shutdown is called properly
   def shutdown(): Unit = {
-    consumer.close();
-    if (executor != null)
-      executor.shutdown();
+    stopping.set(true)
+    Await.result(subscriber, 10.seconds)
   }
 
   override def put(schema: Schema): SchemaId = {

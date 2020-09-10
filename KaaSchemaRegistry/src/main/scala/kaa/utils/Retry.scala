@@ -10,6 +10,7 @@ object Retry {
             case Some(x) => Some(x)
             case None if count > 1 => {
                 Sleep.sleep(delay.toMillis)
+                println("retrying...")
                 retryIfNone(count - 1, delay)(fn)
             }
             case None => None
