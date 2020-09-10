@@ -2,12 +2,10 @@
 
 (KAfka Avro4s Schema Registry)
 
-Avro serializer for case classes with schemas persisted in Kafka.
-It allows to easily share avro schemas across multiple applications and instances
-allowing schema evolution.
+Scala library that provide an embedded Avro schema registry with Kafka persistency and [Avro4s](https://github.com/sksamuel/avro4s) serializer support.
+It allows to easily share avro schemas across multiple applications and instances allowing schema evolution.
 
-[Single object AVRO encoding](https://avro.apache.org/docs/current/spec.html#single_object_encoding) is used to reduce records size, only a schema id (hash)
-is persisted within the record.  
+[Single object AVRO encoding](https://avro.apache.org/docs/current/spec.html#single_object_encoding) is used to reduce records size, only a schema id (hash) is persisted within the record.  
 
 ## Usage
 
