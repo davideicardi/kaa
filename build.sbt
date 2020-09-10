@@ -1,7 +1,8 @@
 lazy val commonSettings = Seq(
   organization := "your-app",
   version := "0.1",
-  scalaVersion := "2.13.3"
+  scalaVersion := "2.13.3",
+  scalacOptions += "-deprecation"
 )
 
 val avro4sVersion = "4.0.0"

@@ -26,12 +26,16 @@ class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with Before
   "KaaSchemaRegistry" should "put and retrieve a schema" in {
     val target = new KaaSchemaRegistry(BROKERS, TOPIC_NAME)
 
-    val schema = AvroSchema[Foo]
-    val schemaId = target.put(schema)
+    try {
+      val schema = AvroSchema[Foo]
+      val schemaId = target.put(schema)
 
-    target.get(schemaId) match {
-      case None => fail("Schema not found")
-      case Some(schemaRetrieved) => schemaRetrieved should be (schema)
+      target.get(schemaId) match {
+        case None => fail("Schema not found")
+        case Some(schemaRetrieved) => schemaRetrieved should be (schema)
+      }
+    } finally {
+      target.shutdown()
     }
   }
 

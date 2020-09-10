@@ -7,21 +7,27 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import java.util.{Collections, Properties, UUID}
 import java.util.concurrent.Executors
 import java.util.concurrent.ExecutorService
+import java.time.{Duration => JavaDuration}
 import collection.JavaConverters._
 import com.github.blemale.scaffeine.{ Cache, Scaffeine }
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.{LongDeserializer, StringDeserializer}
 import org.apache.kafka.common.serialization.{LongSerializer, StringSerializer}
+import scala.concurrent.duration._
+import kaa.utils.Retry
 
 object KaaSchemaRegistry {
-  val DEFAULT_TOPIC_NAME = "kaa-schema-registry-v1"
+  val DEFAULT_TOPIC_NAME = "schemas-v1"
 }
 
 class KaaSchemaRegistry(
   brokers: String,
   topic: String = KaaSchemaRegistry.DEFAULT_TOPIC_NAME,
-  cliendId: String = "KaaSchemaRegistry"
+  cliendId: String = "KaaSchemaRegistry",
+  pollInterval: Duration = 1.second,
+  getRetries: Int = 10,
+  getRetryDelay: Duration = 1.second
 ) extends SchemaRegistry {
 
   // TODO Eval to put this code inside an "init" function instead of here in the constructor
@@ -36,8 +42,9 @@ class KaaSchemaRegistry(
   executor = Executors.newSingleThreadExecutor
   executor.execute(new Runnable {
     override def run(): Unit = {
+      val jPollInterval = JavaDuration.ofMillis(pollInterval.toMillis)
       while (true) {
-        val records = consumer.poll(1000)
+        val records = consumer.poll(jPollInterval)
 
         records.forEach((record) => {
           cache.put(record.key(), record.value())
@@ -65,8 +72,10 @@ class KaaSchemaRegistry(
   }
 
   override def get(id: SchemaId): Option[Schema] = {
-    cache.getIfPresent(id.value)
-      .map(new Schema.Parser().parse)
+    Retry.retryIfNone(getRetries, getRetryDelay) {
+      cache.getIfPresent(id.value)
+        .map(new Schema.Parser().parse)
+    }
   }
 
   def createConsumerConfig(): Properties = {

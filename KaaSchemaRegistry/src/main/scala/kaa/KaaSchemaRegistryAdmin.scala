@@ -7,7 +7,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import java.util.{Collections, Properties, UUID, Optional}
 import java.util.concurrent.Executors
 import java.util.concurrent.ExecutorService
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import com.github.blemale.scaffeine.{ Cache, Scaffeine }
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.consumer.ConsumerConfig
