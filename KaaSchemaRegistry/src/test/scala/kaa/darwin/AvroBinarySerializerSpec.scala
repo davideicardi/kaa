@@ -1,10 +1,10 @@
-package kaa.darwin
+package com.davideicardi.kaa.darwin
 
 import com.sksamuel.avro4s.AvroSchema
 import org.scalatest._
 import flatspec._
 import matchers._
-import kaa.avro.AvroBinarySerializer
+import com.davideicardi.kaa.avro.AvroBinarySerializer
 
 class AvroBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
 
@@ -48,7 +48,7 @@ class AvroBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
     val schema = target.currentSchema
 
     //noinspection ScalaStyle
-    val expectedSchema = """{"type":"record","name":"FooUser","namespace":"kaa.darwin.AvroBinarySerializerSpec","fields":[{"name":"name","type":"string"}]}"""
+    val expectedSchema = """{"type":"record","name":"FooUser","namespace":"com.davideicardi.kaa.darwin.AvroBinarySerializerSpec","fields":[{"name":"name","type":"string"}]}"""
 
     schema.toString(false) should be (expectedSchema)
   }

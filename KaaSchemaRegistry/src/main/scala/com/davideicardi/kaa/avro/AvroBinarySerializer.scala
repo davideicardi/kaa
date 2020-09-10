@@ -1,4 +1,4 @@
-package kaa.avro
+package com.davideicardi.kaa.avro
 
 import java.io.ByteArrayOutputStream
 import com.sksamuel.avro4s._

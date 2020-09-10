@@ -1,4 +1,4 @@
-package kaa.utils
+package com.davideicardi.kaa.utils
 
 import scala.concurrent.duration._
 import scala.concurrent._

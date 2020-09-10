@@ -1,11 +1,11 @@
-package kaa.darwin
+package com.davideicardi.kaa.darwin
 
 import com.sksamuel.avro4s.AvroSchema
 import org.scalatest._
 import flatspec._
 import matchers._
-import kaa.KaaSchemaRegistry
-import kaa.KaaSchemaRegistryAdmin
+import com.davideicardi.kaa.KaaSchemaRegistry
+import com.davideicardi.kaa.KaaSchemaRegistryAdmin
 import java.util.UUID
 
 class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with BeforeAndAfterAll {

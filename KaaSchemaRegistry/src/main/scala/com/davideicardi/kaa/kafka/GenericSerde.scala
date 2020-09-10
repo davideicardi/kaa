@@ -1,8 +1,8 @@
-package kaa.kafka
+package com.davideicardi.kaa.kafka
 
 import com.sksamuel.avro4s.{Decoder, Encoder, SchemaFor}
-import kaa.SchemaRegistry
-import kaa.avro.AvroSingleObjectSerializer
+import com.davideicardi.kaa.SchemaRegistry
+import com.davideicardi.kaa.avro.AvroSingleObjectSerializer
 import org.apache.kafka.common.serialization.{Deserializer, Serde, Serializer}
 
 class GenericSerde[T >: Null : SchemaFor : Encoder : Decoder]
