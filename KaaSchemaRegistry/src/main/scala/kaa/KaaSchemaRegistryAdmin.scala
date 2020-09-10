@@ -23,15 +23,21 @@ class KaaSchemaRegistryAdmin(
 ) {
   val props = new Properties()
   props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, brokers)
+  props.put("delete.enable.topic", "true")
   private val adminClient = AdminClient.create(props)
 
   def createTopic(): Unit = {
     val newTopic = new NewTopic(topic, Optional.empty[java.lang.Integer](), Optional.empty[java.lang.Short]())
-    // TODO set retention to infinite
-    adminClient.createTopics(Collections.singletonList(newTopic))
+    // TODO set retention to infinite or use compact
+    adminClient.createTopics(Collections.singletonList(newTopic)).all().get()
+  }
+
+  def topicExists(): Boolean = {
+    val names = adminClient.listTopics.names.get.asScala
+    names.contains(topic)
   }
 
   def deleteTopic(): Unit = {
-    adminClient.deleteTopics(Collections.singletonList(topic))
+    adminClient.deleteTopics(Collections.singletonList(topic)).all().get()
   }
 }

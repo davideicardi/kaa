@@ -6,23 +6,25 @@ import flatspec._
 import matchers._
 import kaa.KaaSchemaRegistry
 import kaa.KaaSchemaRegistryAdmin
+import java.util.UUID
 
 class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with BeforeAndAfterAll {
 
   val BROKERS = "localhost:9092"
+  val TOPIC_NAME = "schema-registry-test" + UUID.randomUUID().toString()
+  val admin = new KaaSchemaRegistryAdmin(BROKERS, TOPIC_NAME)
 
   override protected def beforeAll(): Unit = {
-    val admin = new KaaSchemaRegistryAdmin(BROKERS)
-    admin.createTopic()
+    if (!admin.topicExists())
+      admin.createTopic()
   }
 
   override protected def afterAll(): Unit = {
-    val admin = new KaaSchemaRegistryAdmin(BROKERS)
     admin.deleteTopic()
   }
 
   "KaaSchemaRegistry" should "put and retrieve a schema" in {
-    val target = new KaaSchemaRegistry(BROKERS)
+    val target = new KaaSchemaRegistry(BROKERS, TOPIC_NAME)
 
     val schema = AvroSchema[Foo]
     val schemaId = target.put(schema)
