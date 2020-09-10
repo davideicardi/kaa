@@ -14,12 +14,16 @@ It allows to easily share avro schemas across multiple applications and instance
 val admin = new KaaSchemaRegistryAdmin(brokers)
 if (!admin.topicExists()) admin.createTopic()
 
+// create the schema registry
 val schemaRegistry = new KaaSchemaRegistry(brokers)
 try {
+    // create the serializer
     val serializerV1 = new AvroSingleObjectSerializer[SuperheroV1](schemaRegistry)
 
+    // serialize
     val bytesV1 = serializerV1.serialize(SuperheroV1("Spiderman"))
 
+    // deserialize
     val result = serializerV1.deserialize(bytesV1)
     println(result)
 } finally {
