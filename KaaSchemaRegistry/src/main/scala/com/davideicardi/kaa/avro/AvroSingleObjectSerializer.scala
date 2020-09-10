@@ -1,7 +1,7 @@
-package kaa.avro
+package com.davideicardi.kaa.avro
 
 import com.sksamuel.avro4s._
-import kaa.SchemaRegistry
+import com.davideicardi.kaa.SchemaRegistry
 
 class AvroSingleObjectSerializer[T >: Null : SchemaFor : Encoder : Decoder]
 (schemaRegistry: SchemaRegistry){

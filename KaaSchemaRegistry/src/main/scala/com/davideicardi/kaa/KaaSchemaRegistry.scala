@@ -1,4 +1,4 @@
-package kaa
+package com.davideicardi.kaa
 
 import org.apache.avro.Schema
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
@@ -15,7 +15,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.{LongDeserializer, StringDeserializer}
 import org.apache.kafka.common.serialization.{LongSerializer, StringSerializer}
 import scala.concurrent.duration._
-import kaa.utils.Retry
+import com.davideicardi.kaa.utils.Retry
 import java.util.concurrent.atomic.AtomicBoolean
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext

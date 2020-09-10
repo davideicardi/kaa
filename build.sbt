@@ -1,8 +1,9 @@
 lazy val commonSettings = Seq(
-  organization := "your-app",
+  organization := "com.davideicardi",
   version := "0.1",
   scalaVersion := "2.13.3",
-  scalacOptions += "-deprecation"
+  scalacOptions += "-deprecation",
+  publishTo := Some("Github packages" at "https://maven.pkg.github.com/davideicardi/kaa")
 )
 
 val avro4sVersion = "4.0.0"
@@ -23,7 +24,7 @@ lazy val KaaSchemaRegistry = project
   .configs(IntegrationTest)
   .settings(
     Defaults.itSettings,
-    name := "KaaSchemaRegistry",
+    name := "kaa",
     commonSettings,
     libraryDependencies ++= testDependencies,
     libraryDependencies ++= dependencies,
@@ -34,11 +35,13 @@ lazy val SampleApp = project
     name := "SampleApp",
     commonSettings,
     libraryDependencies ++= testDependencies,
+    publish / skip := true,
   )
 .dependsOn(KaaSchemaRegistry)
 
 lazy val root = (project in file("."))
   .aggregate(KaaSchemaRegistry, SampleApp)
   .settings(
-    commonSettings
+    commonSettings,
+    publish / skip := true,
   )

@@ -1,7 +1,7 @@
-import kaa.avro.AvroSingleObjectSerializer
-import kaa.KaaSchemaRegistry
+import com.davideicardi.kaa.avro.AvroSingleObjectSerializer
+import com.davideicardi.kaa.KaaSchemaRegistry
 import scala.tools.nsc.doc.html.HtmlTags.Sup
-import kaa.KaaSchemaRegistryAdmin
+import com.davideicardi.kaa.KaaSchemaRegistryAdmin
 object SampleApp {
     def main(args: Array[String]): Unit = {
         println("KaaSchemaRegistry SampleApp")

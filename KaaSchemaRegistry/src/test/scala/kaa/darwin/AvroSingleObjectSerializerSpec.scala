@@ -1,11 +1,11 @@
-package kaa.darwin
+package com.davideicardi.kaa.darwin
 
 import com.sksamuel.avro4s.AvroSchema
 import org.apache.avro.{Schema, SchemaNormalization}
 import org.scalatest._
 import flatspec._
-import kaa.avro.{AvroBinarySerializer, AvroSingleObjectEncoding, AvroSingleObjectSerializer}
-import kaa.{SchemaId, SchemaRegistry}
+import com.davideicardi.kaa.avro.{AvroBinarySerializer, AvroSingleObjectEncoding, AvroSingleObjectSerializer}
+import com.davideicardi.kaa.{SchemaId, SchemaRegistry}
 import matchers._
 
 import scala.collection.mutable

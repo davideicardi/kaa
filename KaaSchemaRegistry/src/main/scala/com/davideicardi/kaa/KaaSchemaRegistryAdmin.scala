@@ -1,4 +1,4 @@
-package kaa
+package com.davideicardi.kaa
 
 import org.apache.avro.Schema
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}

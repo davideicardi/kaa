@@ -1,8 +1,8 @@
-package kaa.avro
+package com.davideicardi.kaa.avro
 
 import java.nio.{ByteBuffer, ByteOrder}
 
-import kaa.SchemaId
+import com.davideicardi.kaa.SchemaId
 
 /**
  * https://avro.apache.org/docs/current/spec.html#single_object_encoding
