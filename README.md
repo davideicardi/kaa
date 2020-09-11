@@ -9,6 +9,11 @@ It allows to easily share avro schemas across multiple applications and instance
 
 ## Usage
 
+```sbt
+externalResolvers += "GitHub davideicardi Apache Maven Packages" at "https://maven.pkg.github.com/davideicardi/kaa"
+libraryDependencies += "com.davideicardi" %% "kaa" % "<version>"
+```
+
 ```scala
 // create the topic
 val admin = new KaaSchemaRegistryAdmin(brokers)

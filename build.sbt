@@ -1,9 +1,18 @@
 lazy val commonSettings = Seq(
   organization := "com.davideicardi",
-  version := "0.1",
   scalaVersion := "2.13.3",
   scalacOptions += "-deprecation",
-  publishTo := Some("Github packages" at "https://maven.pkg.github.com/davideicardi/kaa")
+  // publish to github packages settings
+  publishTo := Some("GitHub davideicardi Apache Maven Packages" at "https://maven.pkg.github.com/davideicardi/kaa"),
+  publishMavenStyle := true,
+  credentials += Credentials(
+    "GitHub Package Registry",
+    "maven.pkg.github.com",
+    "davideicardi",
+    System.getenv("GITHUB_TOKEN")
+  ),
+  // sbt-git version settings
+  git.useGitDescribe := true,
 )
 
 val avro4sVersion = "4.0.0"
@@ -14,8 +23,8 @@ val testDependencies = Seq(
 )
 
 val dependencies = Seq(
-  "com.sksamuel.avro4s" %% "avro4s-core" % avro4sVersion,
-  "com.sksamuel.avro4s" %% "avro4s-kafka" % avro4sVersion,
+  "com.sksamuel.avro4s" %% "avro4s-core" % avro4sVersion exclude("org.slf4j", "slf4j-api"),
+  "com.sksamuel.avro4s" %% "avro4s-kafka" % avro4sVersion exclude("org.slf4j", "slf4j-api"),
   "org.apache.kafka" % "kafka-clients" % kafkaVersion,
   "com.github.blemale" %% "scaffeine" % "4.0.1",
 )
@@ -29,15 +38,16 @@ lazy val KaaSchemaRegistry = project
     libraryDependencies ++= testDependencies,
     libraryDependencies ++= dependencies,
   )
+  .enablePlugins(GitVersioning)
 
 lazy val SampleApp = project
   .settings(
     name := "SampleApp",
     commonSettings,
-    libraryDependencies ++= testDependencies,
     publish / skip := true,
   )
-.dependsOn(KaaSchemaRegistry)
+  .enablePlugins(GitVersioning)
+  .dependsOn(KaaSchemaRegistry)
 
 lazy val root = (project in file("."))
   .aggregate(KaaSchemaRegistry, SampleApp)
