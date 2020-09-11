@@ -2,7 +2,7 @@ lazy val commonSettings = Seq(
   organization := "com.davideicardi",
   scalaVersion := "2.13.3",
   scalacOptions += "-deprecation",
-  // publish to github packages
+  // publish to github packages settings
   publishTo := Some("GitHub davideicardi Apache Maven Packages" at "https://maven.pkg.github.com/davideicardi/kaa"),
   publishMavenStyle := true,
   credentials += Credentials(
@@ -44,7 +44,6 @@ lazy val SampleApp = project
   .settings(
     name := "SampleApp",
     commonSettings,
-    libraryDependencies ++= testDependencies,
     publish / skip := true,
   )
   .enablePlugins(GitVersioning)
