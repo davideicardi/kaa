@@ -2,6 +2,7 @@ lazy val commonSettings = Seq(
   organization := "com.davideicardi",
   scalaVersion := "2.13.3",
   scalacOptions += "-deprecation",
+  // publish to github packages
   publishTo := Some("GitHub davideicardi Apache Maven Packages" at "https://maven.pkg.github.com/davideicardi/kaa"),
   publishMavenStyle := true,
   credentials += Credentials(
@@ -10,6 +11,7 @@ lazy val commonSettings = Seq(
     "davideicardi",
     System.getenv("GITHUB_TOKEN")
   ),
+  // sbt-git version settings
   git.useGitDescribe := true,
 )
 
