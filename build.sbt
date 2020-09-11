@@ -1,9 +1,9 @@
 lazy val commonSettings = Seq(
   organization := "com.davideicardi",
-  version := "0.1",
   scalaVersion := "2.13.3",
   scalacOptions += "-deprecation",
-  publishTo := Some("Github packages" at "https://maven.pkg.github.com/davideicardi/kaa")
+  publishTo := Some("Github packages" at "https://maven.pkg.github.com/davideicardi/kaa"),
+  git.useGitDescribe := true,
 )
 
 val avro4sVersion = "4.0.0"
@@ -29,6 +29,7 @@ lazy val KaaSchemaRegistry = project
     libraryDependencies ++= testDependencies,
     libraryDependencies ++= dependencies,
   )
+  .enablePlugins(GitVersioning)
 
 lazy val SampleApp = project
   .settings(
@@ -37,7 +38,8 @@ lazy val SampleApp = project
     libraryDependencies ++= testDependencies,
     publish / skip := true,
   )
-.dependsOn(KaaSchemaRegistry)
+  .enablePlugins(GitVersioning)
+  .dependsOn(KaaSchemaRegistry)
 
 lazy val root = (project in file("."))
   .aggregate(KaaSchemaRegistry, SampleApp)
