@@ -1,16 +1,18 @@
+import xerial.sbt.Sonatype._
+
 lazy val commonSettings = Seq(
   organization := "com.davideicardi",
   scalaVersion := "2.13.3",
   scalacOptions += "-deprecation",
-  // publish to github packages settings
-  publishTo := Some("GitHub davideicardi Apache Maven Packages" at "https://maven.pkg.github.com/davideicardi/kaa"),
+  // publish to sonatype/maven central
+  publishTo := sonatypePublishToBundle.value,
   publishMavenStyle := true,
-  credentials += Credentials(
-    "GitHub Package Registry",
-    "maven.pkg.github.com",
-    "davideicardi",
-    System.getenv("GITHUB_TOKEN")
-  ),
+  credentials += Credentials("Sonatype Nexus Repository Manager",
+    "oss.sonatype.org",
+    "davide.icardi",
+    System.getenv("SONATYPE_PASSWORD")),
+  licenses := Seq("MIT License" -> url("https://mit-license.org/")),
+  sonatypeProjectHosting := Some(GitHubHosting("davideicardi", "kaa", "davide.icardi@gmail.com")),
   // sbt-git version settings
   git.useGitDescribe := true,
 )

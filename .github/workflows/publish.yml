@@ -1,7 +1,9 @@
-name: Publish package to GitHub Packages
+name: Publish packages
 on:
   release:
     types: [created]
+  push:
+    branches: [ master ]
 
 jobs:
   publish:
@@ -13,6 +15,6 @@ jobs:
       with:
         java-version: 1.8
     - name: Publish package
-      run: sbt test publish
+      run: sbt test publishSigned
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
