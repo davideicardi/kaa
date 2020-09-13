@@ -13,6 +13,7 @@ lazy val commonSettings = Seq(
     System.getenv("SONATYPE_PASSWORD")),
   licenses := Seq("MIT License" -> url("https://mit-license.org/")),
   sonatypeProjectHosting := Some(GitHubHosting("davideicardi", "kaa", "davide.icardi@gmail.com")),
+  useGpgPinentry := true,
   // sbt-git version settings
   git.useGitDescribe := true,
 )
