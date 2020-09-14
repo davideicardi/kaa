@@ -62,7 +62,8 @@ During serialization a schema hash is generated and stored inside Kafka with the
 When deserializing the schema is retrieved from Kafka and used for the deserialization.
 `KaaSchemaRegistry` internally runs a Kafka consumer to read all schemas that will be cached in memory.
 
-There is also a `KaaSchemaRegistryAdmin` that can be used to programmatically creates the Kafka's schema topic. NOTE: remember to put the cleanup policy to `compact` to maintain all the schemas.
+You can use `com.davideicardi.kaa.KaaSchemaRegistryAdmin` to programmatically create Kafka's schema topic.
+NOTE: if you want to create the topic manually, remember to put cleanup policy to `compact` to maintain all the schemas.
 
 ## Credits
 
@@ -71,7 +72,8 @@ There is also a `KaaSchemaRegistryAdmin` that can be used to programmatically cr
 - Avro4s: https://github.com/sksamuel/avro4s
 - Kafka: https://kafka.apache.org/
 - Avro formats: https://gist.github.com/davideicardi/e8c5a69b98e2a0f18867b637069d03a9
-- Agile Lab Darwin for inspiration: https://github.com/agile-lab-dev/darwin
+- Agile Lab's Darwin Schema Registry: https://github.com/agile-lab-dev/darwin
+- Confluent's Schema Registry: https://github.com/confluentinc/schema-registry
 
 ## Contributing
 
