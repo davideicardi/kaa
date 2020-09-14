@@ -14,8 +14,8 @@ lazy val commonSettings = Seq(
   licenses := Seq("MIT License" -> url("https://mit-license.org/")),
   sonatypeProjectHosting := Some(GitHubHosting("davideicardi", "kaa", "davide.icardi@gmail.com")),
   useGpgPinentry := true,
-  // sbt-git version settings
-  git.useGitDescribe := true,
+  // sbt-dynver version settings
+  dynverSonatypeSnapshots := true,
 )
 
 val avro4sVersion = "4.0.0"
@@ -41,7 +41,6 @@ lazy val KaaSchemaRegistry = project
     libraryDependencies ++= testDependencies,
     libraryDependencies ++= dependencies,
   )
-  .enablePlugins(GitVersioning)
 
 lazy val SampleApp = project
   .settings(
@@ -49,7 +48,6 @@ lazy val SampleApp = project
     commonSettings,
     publish / skip := true,
   )
-  .enablePlugins(GitVersioning)
   .dependsOn(KaaSchemaRegistry)
 
 lazy val root = (project in file("."))
