@@ -1,16 +1,26 @@
 name: Publish packages
 on:
-  release:
-    types: [created]
-  push:
-    branches: [ master ]
-
+  # release:
+  #   types: [created]
+  # push:
+  #   branches: [ master ]
+  workflow_dispatch: # manual event
+    inputs:
+      ref:
+        description: 'The branch, tag or SHA to checkout'     
+        required: true
+        default: 'master'
+      isSnapshot:
+        description: 'Set to false if this is an official release'
+        required: true
+        default: 'true'
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
+        ref: "${{ github.event.inputs.ref }}"
         fetch-depth: 0
     - name: Set up JDK 1.8
       uses: actions/setup-java@v1
@@ -18,8 +28,19 @@ jobs:
         java-version: 1.8
         gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }} # Value of the GPG private key to import, use "gpg --armor --export-secret-keys YOUR_ID" to export your key
         gpg-passphrase: PGP_PASSPHRASE # env variable name used for GPG private key passphrase
-    - name: Publish package
-      run: sbt test publishSigned
+    - name: Compile
+      run: sbt compile
+    - name: Test
+      run: sbt test
+    - name: Publish staging
+      run: sbt publishSigned
+      env:
+        SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+        PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }} # sbt-pgp use this env variable to get passphrase
+    - name: Publish release
+      # TODO We should try to do this step automatically if sbt variable isSnapshot is false, now we use a manual event setting
+      if: ${{ github.event.inputs.isSnapshot == 'false' }}
+      run: sbt sonatypeBundleRelease
       env:
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
         PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }} # sbt-pgp use this env variable to get passphrase
