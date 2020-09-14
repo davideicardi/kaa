@@ -18,7 +18,16 @@ credentials in ThisBuild += Credentials(
   System.getenv("SONATYPE_PASSWORD")
 )
 licenses in ThisBuild := Seq("MIT License" -> url("https://mit-license.org/"))
-sonatypeProjectHosting in ThisBuild := Some(GitHubHosting("davideicardi", "kaa", "davide.icardi@gmail.com"))
+homepage in ThisBuild := Some(url("https://github.com/davideicardi/kaa"))
+scmInfo in ThisBuild := Some(
+  ScmInfo(
+    url("https://github.com/davideicardi/kaa"),
+    "scm:git@github.com:davideicardi/kaa.git"
+  )
+)
+developers in ThisBuild := List(
+  Developer(id="davideicardi", name="Davide Icardi", email="davide.icardi@gmail.com", url=url("http://davideicardi.com"))
+)
 // set pinentry=loopback if we have the env variable
 useGpgPinentry in ThisBuild := Option(System.getenv("PGP_PASSPHRASE")).isDefined
 
