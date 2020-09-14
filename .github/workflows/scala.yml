@@ -15,5 +15,8 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - name: Run tests
+    - name: Compile
+      run: sbt compile
+    # TODO add linter
+    - name: Test
       run: sbt test
