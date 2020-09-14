@@ -11,18 +11,17 @@ It allows to easily share avro schemas across multiple applications and instance
 
 ## Usage
 
-For snapshot releases:
+Official releases (published in Maven Central):
+
+```sbt
+libraryDependencies += "com.davideicardi" %% "kaa" % "<version>"
+```
+
+Packages are also available in Sonatype, also with snapshots versions:
 
 ```sbt
 externalResolvers += Resolver.sonatypeRepo("snapshots")
-libraryDependencies += "com.davideicardi" %% "kaa" % "<version>-SNAPSHOT"
-```
-
-For official releases:
-
-```sbt
-externalResolvers += Resolver.sonatypeRepo("public")
-libraryDependencies += "com.davideicardi" %% "kaa" % "<version>"
+// externalResolvers += Resolver.sonatypeRepo("public") // for official releases
 ```
 
 Using `AvroSingleObjectSerializer`:
