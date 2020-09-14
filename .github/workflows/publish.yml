@@ -17,7 +17,7 @@ jobs:
         gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }} # Value of the GPG private key to import, use "gpg --armor --export-secret-keys YOUR_ID" to export your key
         gpg-passphrase: PGP_PASSPHRASE # env variable name used for GPG private key passphrase
     - name: Publish package
-      run: sbt test publishSigned
+      run: sbt test publishSigned sonatypeBundleRelase
       env:
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
         PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }} # sbt-pgp use this env variable to get passphrase

@@ -7,13 +7,15 @@ lazy val commonSettings = Seq(
   // publish to sonatype/maven central
   publishTo := sonatypePublishToBundle.value,
   publishMavenStyle := true,
-  credentials += Credentials("Sonatype Nexus Repository Manager",
+  credentials += Credentials(
+    "Sonatype Nexus Repository Manager",
     "oss.sonatype.org",
     "davide.icardi",
-    System.getenv("SONATYPE_PASSWORD")),
+    System.getenv("SONATYPE_PASSWORD")
+  ),
   licenses := Seq("MIT License" -> url("https://mit-license.org/")),
   sonatypeProjectHosting := Some(GitHubHosting("davideicardi", "kaa", "davide.icardi@gmail.com")),
-  useGpgPinentry := true,
+  useGpgPinentry := Option(System.getenv("PGP_PASSPHRASE")).isDefined, // set pinentry=loopback if we have the env variable
   // sbt-dynver version settings
   dynverSonatypeSnapshots := true,
 )
