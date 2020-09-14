@@ -1,21 +1,26 @@
 import xerial.sbt.Sonatype._
 
-lazy val commonSettings = Seq(
-  organization := "com.davideicardi",
-  scalaVersion := "2.13.3",
-  scalacOptions += "-deprecation",
+// Common settings
+organization in ThisBuild := "com.davideicardi"
+scalaVersion in ThisBuild := "2.13.3"
+scalacOptions in ThisBuild += "-deprecation"
+
+// sbt-dynver version settings
+dynverSonatypeSnapshots in ThisBuild := true
+
+lazy val publishSettings = Seq(
   // publish to sonatype/maven central
   publishTo := sonatypePublishToBundle.value,
   publishMavenStyle := true,
-  credentials += Credentials("Sonatype Nexus Repository Manager",
+  credentials += Credentials(
+    "Sonatype Nexus Repository Manager",
     "oss.sonatype.org",
     "davide.icardi",
-    System.getenv("SONATYPE_PASSWORD")),
+    System.getenv("SONATYPE_PASSWORD")
+  ),
   licenses := Seq("MIT License" -> url("https://mit-license.org/")),
   sonatypeProjectHosting := Some(GitHubHosting("davideicardi", "kaa", "davide.icardi@gmail.com")),
-  useGpgPinentry := true,
-  // sbt-dynver version settings
-  dynverSonatypeSnapshots := true,
+  useGpgPinentry := Option(System.getenv("PGP_PASSPHRASE")).isDefined, // set pinentry=loopback if we have the env variable
 )
 
 val avro4sVersion = "4.0.0"
@@ -37,7 +42,7 @@ lazy val KaaSchemaRegistry = project
   .settings(
     Defaults.itSettings,
     name := "kaa",
-    commonSettings,
+    publishSettings,
     libraryDependencies ++= testDependencies,
     libraryDependencies ++= dependencies,
   )
@@ -45,7 +50,6 @@ lazy val KaaSchemaRegistry = project
 lazy val SampleApp = project
   .settings(
     name := "SampleApp",
-    commonSettings,
     publish / skip := true,
   )
   .dependsOn(KaaSchemaRegistry)
@@ -53,6 +57,5 @@ lazy val SampleApp = project
 lazy val root = (project in file("."))
   .aggregate(KaaSchemaRegistry, SampleApp)
   .settings(
-    commonSettings,
     publish / skip := true,
   )
