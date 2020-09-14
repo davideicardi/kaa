@@ -1,5 +1,5 @@
 // used to automatic calculate version based on git describe
-addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "1.0.0")
+addSbtPlugin("com.dwijnand" % "sbt-dynver" % "4.1.1")
 
 // used to publish artifact to maven central via sonatype nexus
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.4")
