@@ -11,10 +11,21 @@ It allows to easily share avro schemas across multiple applications and instance
 
 ## Usage
 
+For snapshot releases:
+
 ```sbt
-externalResolvers += "GitHub davideicardi Apache Maven Packages" at "https://maven.pkg.github.com/davideicardi/kaa"
+externalResolvers += Resolver.sonatypeRepo("snapshots")
+libraryDependencies += "com.davideicardi" %% "kaa" % "<version>-SNAPSHOT"
+```
+
+For official releases:
+
+```sbt
+externalResolvers += Resolver.sonatypeRepo("public")
 libraryDependencies += "com.davideicardi" %% "kaa" % "<version>"
 ```
+
+Using `AvroSingleObjectSerializer`:
 
 ```scala
 // create the topic
@@ -40,13 +51,13 @@ try {
 case class SuperheroV1(name: String)
 ```
 
-## Internals
+## Features
 
 Kaa provides essentially 3 features:
 
-- a simple embeddable schema registry, `KaaSchemaRegistry`, that read and write schemas to Kafka
-- an avro serializer/deserializer based on Avro4s, `AvroSingleObjectSerializer`, that internally uses `KaaSchemaRegistry`
-- an implementation of Kafka's `Serde[T]` based on `AvroSingleObjectSerializer`
+- `com.davideicardi.kaa.KaaSchemaRegistry`: a simple embeddable schema registry that read and write schemas to Kafka
+- `com.davideicardi.kaa.avro.AvroSingleObjectSerializer`: an avro serializer/deserializer based on Avro4s that internally uses `KaaSchemaRegistry`
+- `com.davideicardi.kaa.kafka.GenericSerde[T]` an implementation of Kafka's `Serde[T]` based on `AvroSingleObjectSerializer`
 
 During serialization a schema hash is generated and stored inside Kafka (key=hash, value=schema).
 When deserializing the schema is retrieved from Kafka and used for the deserialization.

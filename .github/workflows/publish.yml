@@ -1,9 +1,7 @@
 name: Publish packages
 on:
-  # release:
-  #   types: [created]
-  # push:
-  #   branches: [ master ]
+  release: # on new releases
+    types: [created]
   workflow_dispatch: # manual event
     inputs:
       ref:
@@ -38,8 +36,9 @@ jobs:
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
         PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }} # sbt-pgp use this env variable to get passphrase
     - name: Publish release
-      # TODO We should try to do this step automatically if sbt variable isSnapshot is false, now we use a manual event setting
-      if: ${{ github.event.inputs.isSnapshot == 'false' }}
+      # TODO We should try to do this step automatically inside sbt:
+      #  if sbt variable isSnapshot is false, now we use a manual event setting
+      if: ${{ github.event.inputs.isSnapshot != 'true' }}
       run: sbt sonatypeBundleRelease
       env:
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}

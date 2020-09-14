@@ -8,20 +8,29 @@ scalacOptions in ThisBuild += "-deprecation"
 // sbt-dynver version settings
 dynverSonatypeSnapshots in ThisBuild := true
 
-lazy val publishSettings = Seq(
-  // publish to sonatype/maven central
-  publishTo := sonatypePublishToBundle.value,
-  publishMavenStyle := true,
-  credentials += Credentials(
-    "Sonatype Nexus Repository Manager",
-    "oss.sonatype.org",
-    "davide.icardi",
-    System.getenv("SONATYPE_PASSWORD")
-  ),
-  licenses := Seq("MIT License" -> url("https://mit-license.org/")),
-  sonatypeProjectHosting := Some(GitHubHosting("davideicardi", "kaa", "davide.icardi@gmail.com")),
-  useGpgPinentry := Option(System.getenv("PGP_PASSPHRASE")).isDefined, // set pinentry=loopback if we have the env variable
+// publish to sonatype/maven central
+publishTo in ThisBuild := sonatypePublishToBundle.value
+publishMavenStyle in ThisBuild := true
+credentials in ThisBuild += Credentials(
+  "Sonatype Nexus Repository Manager",
+  "oss.sonatype.org",
+  "davide.icardi",
+  System.getenv("SONATYPE_PASSWORD")
 )
+licenses in ThisBuild := Seq("MIT License" -> url("https://mit-license.org/"))
+homepage in ThisBuild := Some(url("https://github.com/davideicardi/kaa"))
+scmInfo in ThisBuild := Some(
+  ScmInfo(
+    url("https://github.com/davideicardi/kaa"),
+    "scm:git@github.com:davideicardi/kaa.git"
+  )
+)
+developers in ThisBuild := List(
+  Developer(id="davideicardi", name="Davide Icardi", email="davide.icardi@gmail.com", url=url("http://davideicardi.com"))
+)
+// set pinentry=loopback if we have the env variable
+useGpgPinentry in ThisBuild := Option(System.getenv("PGP_PASSPHRASE")).isDefined
+
 
 val avro4sVersion = "4.0.0"
 val kafkaVersion = "2.4.0" // NOTE: there is a dependencies to kafka also from avro4s-kafka
@@ -42,7 +51,6 @@ lazy val KaaSchemaRegistry = project
   .settings(
     Defaults.itSettings,
     name := "kaa",
-    publishSettings,
     libraryDependencies ++= testDependencies,
     libraryDependencies ++= dependencies,
   )
