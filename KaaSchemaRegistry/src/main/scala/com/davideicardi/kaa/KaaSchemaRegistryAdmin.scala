@@ -13,9 +13,8 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.{LongDeserializer, StringDeserializer}
 import org.apache.kafka.common.serialization.{LongSerializer, StringSerializer}
-import org.apache.kafka.clients.admin.AdminClient
-import org.apache.kafka.clients.admin.AdminClientConfig
-import org.apache.kafka.clients.admin.NewTopic
+import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig, NewTopic}
+import org.apache.kafka.common.config.TopicConfig
 
 class KaaSchemaRegistryAdmin(
   brokers: String,
@@ -28,7 +27,11 @@ class KaaSchemaRegistryAdmin(
 
   def createTopic(): Unit = {
     val newTopic = new NewTopic(topic, Optional.empty[java.lang.Integer](), Optional.empty[java.lang.Short]())
-    // TODO set retention to infinite or use compact
+    val newTopicsConfigs = Map (
+      TopicConfig.CLEANUP_POLICY_CONFIG -> TopicConfig.CLEANUP_POLICY_COMPACT
+    )
+    newTopic.configs(newTopicsConfigs.asJava)
+
     adminClient.createTopics(Collections.singletonList(newTopic)).all().get()
   }
 
