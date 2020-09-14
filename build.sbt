@@ -28,9 +28,6 @@ scmInfo in ThisBuild := Some(
 developers in ThisBuild := List(
   Developer(id="davideicardi", name="Davide Icardi", email="davide.icardi@gmail.com", url=url("http://davideicardi.com"))
 )
-// set pinentry=loopback if we have the env variable
-useGpgPinentry in ThisBuild := Option(System.getenv("PGP_PASSPHRASE")).isDefined
-
 
 val avro4sVersion = "4.0.0"
 val kafkaVersion = "2.4.0" // NOTE: there is a dependencies to kafka also from avro4s-kafka
@@ -51,6 +48,8 @@ lazy val KaaSchemaRegistry = project
   .settings(
     Defaults.itSettings,
     name := "kaa",
+    // set pinentry=loopback if we have the env variable, to avoid asking for passphrase
+    useGpgPinentry := Option(System.getenv("PGP_PASSPHRASE")).isDefined,
     libraryDependencies ++= testDependencies,
     libraryDependencies ++= dependencies,
   )
