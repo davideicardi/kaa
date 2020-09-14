@@ -2,12 +2,12 @@
 
 ![Scala CI](https://github.com/davideicardi/kaa/workflows/Scala%20CI/badge.svg)
 
-(KAfka Avro4s Schema Registry)
+(Kafka Avro4s Schema Registry)
 
-Scala library that provide an embedded Avro schema registry with Kafka persistency and [Avro4s](https://github.com/sksamuel/avro4s) serializer support.
-It allows to easily share avro schemas across multiple applications and instances allowing schema evolution.
+Scala client library that provide an Avro schema registry with Kafka persistency and [Avro4s](https://github.com/sksamuel/avro4s) serializer support.
+It allows to share avro schemas across multiple applications without third party software (it can replace [Confluent Schema Registry](https://github.com/confluentinc/schema-registry)). You can use this library with your Kafka client app without calling an external service for schema resolution.
 
-[Single object AVRO encoding](https://avro.apache.org/docs/current/spec.html#single_object_encoding) is used to reduce records size, only a schema id (hash) is persisted within the record.  
+For serialization, [Single object AVRO encoding](https://avro.apache.org/docs/current/spec.html#single_object_encoding) is used to reduce records size, only a schema id (hash) is persisted within the record.  
 
 ## Usage
 
