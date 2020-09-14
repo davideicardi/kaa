@@ -4,8 +4,7 @@ import com.sksamuel.avro4s.AvroSchema
 import org.scalatest._
 import flatspec._
 import matchers._
-import com.davideicardi.kaa.KaaSchemaRegistry
-import com.davideicardi.kaa.KaaSchemaRegistryAdmin
+import com.davideicardi.kaa.{KaaSchemaRegistry, KaaSchemaRegistryAdmin, SchemaId}
 import java.util.UUID
 
 class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with BeforeAndAfterAll {
@@ -33,6 +32,19 @@ class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with Before
       target.get(schemaId) match {
         case None => fail("Schema not found")
         case Some(schemaRetrieved) => schemaRetrieved should be (schema)
+      }
+    } finally {
+      target.shutdown()
+    }
+  }
+
+  it should "return None for not existing schema" in {
+    val target = new KaaSchemaRegistry(BROKERS, TOPIC_NAME)
+
+    try {
+      target.get(SchemaId(999L)) match {
+        case None => succeed
+        case Some(_) => fail("Schema should not be retrieved")
       }
     } finally {
       target.shutdown()

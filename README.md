@@ -56,11 +56,13 @@ Kaa provides essentially 3 features:
 
 - `com.davideicardi.kaa.KaaSchemaRegistry`: a simple embeddable schema registry that read and write schemas to Kafka
 - `com.davideicardi.kaa.avro.AvroSingleObjectSerializer`: an avro serializer/deserializer based on Avro4s that internally uses `KaaSchemaRegistry`
-- `com.davideicardi.kaa.kafka.GenericSerde[T]` an implementation of Kafka's `Serde[T]` based on `AvroSingleObjectSerializer`
+- `com.davideicardi.kaa.kafka.GenericSerde[T]` an implementation of Kafka's `Serde[T]` based on `AvroSingleObjectSerializer`, that can be used with Kafka Stream
 
-During serialization a schema hash is generated and stored inside Kafka (key=hash, value=schema).
+During serialization a schema hash is generated and stored inside Kafka with the schema (key=hash, value=schema).
 When deserializing the schema is retrieved from Kafka and used for the deserialization.
-An embedded Kafka consumer reads all schemas that will be cached in memory.
+`KaaSchemaRegistry` internally runs a Kafka consumer to read all schemas that will be cached in memory.
+
+There is also a `KaaSchemaRegistryAdmin` that can be used to programmatically creates the Kafka's schema topic. NOTE: remember to put the cleanup policy to `compact` to maintain all the schemas.
 
 ## Credits
 
@@ -82,6 +84,7 @@ sbt test
 Run integration tests:
 
 ```
-docker-compose up
+docker-compose up -d
 sbt it:test
+docker-compose down
 ```
