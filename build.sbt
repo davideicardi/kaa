@@ -10,17 +10,18 @@ dynverSonatypeSnapshots in ThisBuild := true
 
 lazy val publishSettings = Seq(
   // publish to sonatype/maven central
+  publishTo := sonatypePublishToBundle.value,
+  publishMavenStyle := true,
+  credentials += Credentials(
+    "Sonatype Nexus Repository Manager",
+    "oss.sonatype.org",
+    "davide.icardi",
+    System.getenv("SONATYPE_PASSWORD")
+  ),
   licenses := Seq("MIT License" -> url("https://mit-license.org/")),
   sonatypeProjectHosting := Some(GitHubHosting("davideicardi", "kaa", "davide.icardi@gmail.com")),
   useGpgPinentry := Option(System.getenv("PGP_PASSPHRASE")).isDefined, // set pinentry=loopback if we have the env variable
 )
-
-// def isSnapshot(state: State): Boolean = {
-//   isSnapshot.in(ThisBuild).get(Project.extract(state).structure.data) match {
-//     case Some(v) => v
-//     case None    => true
-//   }
-// }
 
 val avro4sVersion = "4.0.0"
 val kafkaVersion = "2.4.0" // NOTE: there is a dependencies to kafka also from avro4s-kafka

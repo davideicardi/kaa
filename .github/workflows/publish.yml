@@ -11,7 +11,7 @@ on:
         required: true
         default: 'master'
       isSnapshot:
-        description: 'Set to false if this is an official release'
+        description: 'Is snapshot release? Set to false if this is an official release'
         required: true
         default: 'true'
 jobs:

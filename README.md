@@ -1,5 +1,7 @@
 # kaa-schema-registry
 
+![Scala CI](https://github.com/davideicardi/kaa/workflows/Scala%20CI/badge.svg)
+
 (KAfka Avro4s Schema Registry)
 
 Scala library that provide an embedded Avro schema registry with Kafka persistency and [Avro4s](https://github.com/sksamuel/avro4s) serializer support.
