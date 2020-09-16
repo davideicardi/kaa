@@ -5,18 +5,23 @@ import scala.concurrent._
 
 object Retry {
     @annotation.tailrec
-    def retryIfNone[T](count: Int, delay: Duration)(fn: => Option[T]): Option[T] = {
+    def retryIfNone[T](retryConfig: RetryConfig)(fn: => Option[T]): Option[T] = {
         fn match {
             case Some(x) => Some(x)
-            case None if count > 1 => {
-                Sleep.sleep(delay.toMillis)
-                println("retrying...")
-                retryIfNone(count - 1, delay)(fn)
+            case None if retryConfig.count > 1 => {
+                Sleep.sleep(retryConfig.delay.toMillis)
+                retryIfNone(retryConfig.copy(count = retryConfig.count - 1))(fn)
             }
             case None => None
         }
     }
 }
+
+object RetryConfig {
+  val NoRetry = RetryConfig(0, 0.second)
+}
+
+case class RetryConfig(count: Int, delay: Duration) {}
 
 object Sleep {
   def sleep(millis: Long): Unit =
