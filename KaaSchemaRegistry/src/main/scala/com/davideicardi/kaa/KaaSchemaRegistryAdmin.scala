@@ -1,18 +1,7 @@
 package com.davideicardi.kaa
 
-import org.apache.avro.Schema
-import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
-import org.apache.avro.SchemaNormalization
-import org.apache.kafka.clients.consumer.KafkaConsumer
-import java.util.{Collections, Properties, UUID, Optional}
-import java.util.concurrent.Executors
-import java.util.concurrent.ExecutorService
+import java.util.{Collections, Properties, Optional}
 import scala.jdk.CollectionConverters._
-import com.github.blemale.scaffeine.{ Cache, Scaffeine }
-import org.apache.kafka.clients.producer.ProducerConfig
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.common.serialization.{LongDeserializer, StringDeserializer}
-import org.apache.kafka.common.serialization.{LongSerializer, StringSerializer}
 import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig, NewTopic}
 import org.apache.kafka.common.config.TopicConfig
 
@@ -32,7 +21,7 @@ class KaaSchemaRegistryAdmin(
     )
     newTopic.configs(newTopicsConfigs.asJava)
 
-    adminClient.createTopics(Collections.singletonList(newTopic)).all().get()
+    val _ = adminClient.createTopics(Collections.singletonList(newTopic)).all().get()
   }
 
   def topicExists(): Boolean = {
@@ -41,6 +30,6 @@ class KaaSchemaRegistryAdmin(
   }
 
   def deleteTopic(): Unit = {
-    adminClient.deleteTopics(Collections.singletonList(topic)).all().get()
+    val _ = adminClient.deleteTopics(Collections.singletonList(topic)).all().get()
   }
 }

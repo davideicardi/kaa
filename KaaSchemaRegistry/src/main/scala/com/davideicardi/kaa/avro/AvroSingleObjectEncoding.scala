@@ -3,6 +3,7 @@ package com.davideicardi.kaa.avro
 import java.nio.{ByteBuffer, ByteOrder}
 
 import com.davideicardi.kaa.SchemaId
+import com.davideicardi.kaa.InvalidSchemaException
 
 /**
  * https://avro.apache.org/docs/current/spec.html#single_object_encoding
@@ -24,7 +25,7 @@ object AvroSingleObjectEncoding {
       SchemaId(id) -> data
     }
     else {
-      throw new Exception(s"Byte array is not in correct format. First ${V1_HEADER.length} bytes are not equal" +
+      throw new InvalidSchemaException(s"Byte array is not in correct format. First ${V1_HEADER.length} bytes are not equal" +
         s" to ${V1_HEADER.mkString("[", ", ", "]")}")
     }
   }

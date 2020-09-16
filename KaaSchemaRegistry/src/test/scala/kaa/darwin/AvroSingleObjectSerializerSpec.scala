@@ -36,9 +36,6 @@ class AvroSingleObjectSerializerSpec extends AnyFlatSpec with should.Matchers {
     bin should be (binarySerializer.write(dragonite))
   }
 
-  // TODO add tests to verify that it is backward and forward compatibile
-  // add tests to verify what's happening when schema is not found
-
   object AvroUtils {
     def calcFingerprint(schema: Schema): SchemaId = {
       SchemaId(SchemaNormalization.parsingFingerprint64(schema))

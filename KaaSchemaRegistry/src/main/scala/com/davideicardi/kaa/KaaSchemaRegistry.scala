@@ -5,10 +5,7 @@ import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.apache.avro.SchemaNormalization
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import java.util.{Collections, Properties, UUID}
-import java.util.concurrent.Executors
-import java.util.concurrent.ExecutorService
 import java.time.{Duration => JavaDuration}
-import collection.JavaConverters._
 import com.github.blemale.scaffeine.{ Cache, Scaffeine }
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -20,6 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Await
+import com.davideicardi.kaa.utils.RetryConfig
 
 object KaaSchemaRegistry {
   val DEFAULT_TOPIC_NAME = "schemas-v1"
@@ -30,20 +28,18 @@ class KaaSchemaRegistry(
   topic: String = KaaSchemaRegistry.DEFAULT_TOPIC_NAME,
   cliendId: String = "KaaSchemaRegistry",
   pollInterval: Duration = 5.second,
-  getRetries: Int = 5,
-  getRetryDelay: Duration = 2.second
+  getRetry: RetryConfig = RetryConfig(5, 2.second)
 ) extends SchemaRegistry {
 
-  // TODO Eval to put this code inside an "init" function instead of here in the constructor
-  private val producer: KafkaProducer[java.lang.Long, String]
-    = new KafkaProducer(createProducerConfig(), new LongSerializer(), new StringSerializer())
-  private val consumer: KafkaConsumer[java.lang.Long, String]
-    = new KafkaConsumer(createConsumerConfig(), new LongDeserializer(), new StringDeserializer())
-  private var executor: ExecutorService = null
+  implicit private val ec = ExecutionContext.global
+
+  private val producer = createProducer()
+  private val consumer = createConsumer()
   private val cache: Cache[Long, String] = Scaffeine().build[Long, String]()
   private val stopping = new AtomicBoolean(false)
-  implicit private val ec = ExecutionContext.global
-  private val subscriber = Future {
+  private val startConsumerFuture = startConsumer()
+
+  private def startConsumer(): Future[Unit] = Future {
     consumer.subscribe(Collections.singletonList(topic))
       val jPollInterval = JavaDuration.ofMillis(pollInterval.toMillis)
       while (!stopping.get()) {
@@ -57,13 +53,14 @@ class KaaSchemaRegistry(
       consumer.close();
   }
 
-  // TODO eval if shutdown is called properly
   def shutdown(): Unit = {
     stopping.set(true)
-    Await.result(subscriber, 10.seconds)
+    Await.result(startConsumerFuture, 10.seconds)
   }
 
   override def put(schema: Schema): SchemaId = {
+    if (stopping.get()) throw new UnsupportedOperationException("KaaSchemaRegistry is not available")
+
     val fingerprint = SchemaNormalization.parsingFingerprint64(schema)
 
     if (cache.getIfPresent(fingerprint).isEmpty) {
@@ -75,28 +72,36 @@ class KaaSchemaRegistry(
   }
 
   override def get(id: SchemaId): Option[Schema] = {
-    Retry.retryIfNone(getRetries, getRetryDelay) {
+    Retry.retryIfNone(getRetry) {
       cache.getIfPresent(id.value)
         .map(new Schema.Parser().parse)
     }
   }
 
-  def createConsumerConfig(): Properties = {
+  protected def createConsumer() = {
+    new KafkaConsumer(consumerProps(), new LongDeserializer(), new StringDeserializer())    
+  }
+
+  protected def consumerProps(): Properties = {
     val props = new Properties()
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers)
     props.put(ConsumerConfig.CLIENT_ID_CONFIG, cliendId)
     props.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString());
     props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false")
     props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
-    // TODO study if we need other default properties and allow to extend this from outside
+
     props
   }
 
-  def createProducerConfig(): Properties = {
+  protected def createProducer() = {
+    new KafkaProducer(producerProps(), new LongSerializer(), new StringSerializer())    
+  }
+
+  protected def producerProps(): Properties = {
     val props = new Properties()
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers)
     props.put(ProducerConfig.CLIENT_ID_CONFIG, cliendId)
-    // TODO study if we need other default properties and allow to extend this from outside
+ 
     props
   }
 }
