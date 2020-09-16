@@ -5,10 +5,7 @@ import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.apache.avro.SchemaNormalization
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import java.util.{Collections, Properties, UUID}
-import java.util.concurrent.Executors
-import java.util.concurrent.ExecutorService
 import java.time.{Duration => JavaDuration}
-import collection.JavaConverters._
 import com.github.blemale.scaffeine.{ Cache, Scaffeine }
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -39,7 +36,6 @@ class KaaSchemaRegistry(
     = new KafkaProducer(createProducerConfig(), new LongSerializer(), new StringSerializer())
   private val consumer: KafkaConsumer[java.lang.Long, String]
     = new KafkaConsumer(createConsumerConfig(), new LongDeserializer(), new StringDeserializer())
-  private var executor: ExecutorService = null
   private val cache: Cache[Long, String] = Scaffeine().build[Long, String]()
   private val stopping = new AtomicBoolean(false)
   implicit private val ec = ExecutionContext.global

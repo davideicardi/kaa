@@ -1,6 +1,5 @@
 import com.davideicardi.kaa.avro.AvroSingleObjectSerializer
 import com.davideicardi.kaa.KaaSchemaRegistry
-import scala.tools.nsc.doc.html.HtmlTags.Sup
 import com.davideicardi.kaa.KaaSchemaRegistryAdmin
 object SampleApp {
     def main(args: Array[String]): Unit = {
