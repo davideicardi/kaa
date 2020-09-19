@@ -1,9 +1,10 @@
 package com.davideicardi.kaa
 
 import java.util.{Collections, Properties, Optional}
-import scala.jdk.CollectionConverters._
 import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig, NewTopic}
 import org.apache.kafka.common.config.TopicConfig
+
+import com.davideicardi.kaa.utils.CollectionConverters
 
 class KaaSchemaRegistryAdmin(
   brokers: String,
@@ -19,13 +20,13 @@ class KaaSchemaRegistryAdmin(
     val newTopicsConfigs = Map (
       TopicConfig.CLEANUP_POLICY_CONFIG -> TopicConfig.CLEANUP_POLICY_COMPACT
     )
-    newTopic.configs(newTopicsConfigs.asJava)
+    newTopic.configs(CollectionConverters.mapAsJava(newTopicsConfigs))
 
     val _ = adminClient.createTopics(Collections.singletonList(newTopic)).all().get()
   }
 
   def topicExists(): Boolean = {
-    val names = adminClient.listTopics.names.get.asScala
+    val names = adminClient.listTopics.names.get
     names.contains(topic)
   }
 
