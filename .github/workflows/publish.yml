@@ -27,11 +27,11 @@ jobs:
         gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }} # Value of the GPG private key to import, use "gpg --armor --export-secret-keys YOUR_ID" to export your key
         gpg-passphrase: PGP_PASSPHRASE # env variable name used for GPG private key passphrase
     - name: Compile
-      run: sbt compile
+      run: sbt +compile
     - name: Test
-      run: sbt test
+      run: sbt +test
     - name: Publish staging
-      run: sbt publishSigned
+      run: sbt +publishSigned
       env:
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
         PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }} # sbt-pgp use this env variable to get passphrase

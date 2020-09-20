@@ -16,7 +16,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Compile
-      run: sbt compile
+      run: sbt +compile
     # TODO add linter
     - name: Test
-      run: sbt test
+      run: sbt +test

@@ -6,7 +6,7 @@ organization in ThisBuild := "com.davideicardi"
 scalaVersion in ThisBuild := defaultScalaVersion
 crossScalaVersions in ThisBuild := Seq(defaultScalaVersion, "2.12.12")
 scalacOptions in ThisBuild ++= Seq(
-  "-language:higherKinds", // Allow higher kinds types (TODO: I don't understand why I need this feature for scala 2.12 only)
+  "-language:higherKinds", // Allow higher kinds types (for scala 2.12 only)
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
   "-explaintypes", // Explain type errors in more detail.
   "-feature", // Emit warning and location for usages of features that should be imported explicitly.
