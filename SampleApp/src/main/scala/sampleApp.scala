@@ -1,7 +1,9 @@
 import com.davideicardi.kaa.avro.AvroSingleObjectSerializer
 import com.davideicardi.kaa.KaaSchemaRegistry
 import com.davideicardi.kaa.KaaSchemaRegistryAdmin
+
 object SampleApp {
+    
     def main(args: Array[String]): Unit = {
         println("KaaSchemaRegistry SampleApp")
 

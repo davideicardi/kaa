@@ -1,9 +1,12 @@
 import xerial.sbt.Sonatype._
 
 // Common settings
+val defaultScalaVersion = "2.13.3"
 organization in ThisBuild := "com.davideicardi"
-scalaVersion in ThisBuild := "2.13.3"
+scalaVersion in ThisBuild := defaultScalaVersion
+crossScalaVersions in ThisBuild := Seq(defaultScalaVersion, "2.12.12")
 scalacOptions in ThisBuild ++= Seq(
+  "-language:higherKinds", // Allow higher kinds types (for scala 2.12 only)
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
   "-explaintypes", // Explain type errors in more detail.
   "-feature", // Emit warning and location for usages of features that should be imported explicitly.
@@ -96,4 +99,5 @@ lazy val root = (project in file("."))
   .aggregate(KaaSchemaRegistry, SampleApp)
   .settings(
     publish / skip := true,
+    crossScalaVersions := Nil,
   )

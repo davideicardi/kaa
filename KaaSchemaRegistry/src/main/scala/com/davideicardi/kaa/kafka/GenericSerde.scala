@@ -24,6 +24,10 @@ class GenericSerde[T >: Null : SchemaFor : Encoder : Decoder]
   override def serialize(topic: String, data: T): Array[Byte] = {
     avroSerializer.serialize(data)
   }
+
+  override def close(): Unit = ()
+
+  override def configure(configs: java.util.Map[String, _], isKey: Boolean): Unit = ()
 }
 
 
