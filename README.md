@@ -9,6 +9,14 @@ It allows to share avro schemas across multiple applications without third party
 
 For serialization, [Single object AVRO encoding](https://avro.apache.org/docs/current/spec.html#single_object_encoding) is used to reduce records size, only a schema id (hash) is persisted within the record.  
 
+## Prerequisites
+
+Compiled with:
+
+- Scala 2.12, 2.13
+- Kafka 2.4
+- Avro4s 4.0
+
 ## Usage
 
 Official releases (published in Maven Central):
