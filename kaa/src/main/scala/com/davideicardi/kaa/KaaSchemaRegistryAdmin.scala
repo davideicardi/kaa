@@ -16,7 +16,12 @@ class KaaSchemaRegistryAdmin(
   private val adminClient = AdminClient.create(props)
 
   def createTopic(): Unit = {
-    val newTopic = new NewTopic(topic, Optional.empty[java.lang.Integer](), Optional.empty[java.lang.Short]())
+    val NUMBER_OF_PARTITIONS = 1
+    val newTopic = new NewTopic(
+      topic,
+      Optional.of[java.lang.Integer](NUMBER_OF_PARTITIONS),
+      Optional.empty[java.lang.Short]()
+    )
     val newTopicsConfigs = Map (
       TopicConfig.CLEANUP_POLICY_CONFIG -> TopicConfig.CLEANUP_POLICY_COMPACT
     )
