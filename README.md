@@ -104,3 +104,11 @@ docker-compose up -d
 sbt it:test
 docker-compose down
 ```
+
+Run example application:
+
+```
+docker-compose up -d
+sbt sample/run
+docker-compose down
+```

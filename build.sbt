@@ -77,7 +77,7 @@ val dependencies = Seq(
   "com.github.blemale" %% "scaffeine" % "4.0.1",
 )
 
-lazy val KaaSchemaRegistry = project
+lazy val kaa = project
   .configs(IntegrationTest)
   .settings(
     Defaults.itSettings,
@@ -88,15 +88,15 @@ lazy val KaaSchemaRegistry = project
     libraryDependencies ++= dependencies,
   )
 
-lazy val SampleApp = project
+lazy val sample = project
   .settings(
-    name := "SampleApp",
+    name := "sample",
     publish / skip := true,
   )
-  .dependsOn(KaaSchemaRegistry)
+  .dependsOn(kaa)
 
 lazy val root = (project in file("."))
-  .aggregate(KaaSchemaRegistry, SampleApp)
+  .aggregate(kaa, sample)
   .settings(
     publish / skip := true,
     crossScalaVersions := Nil,
