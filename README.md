@@ -7,7 +7,28 @@
 Scala client library that provide an Avro schema registry with Kafka persistency and [Avro4s](https://github.com/sksamuel/avro4s) serializer support.
 It allows to share avro schemas across multiple applications without third party software (it can replace [Confluent Schema Registry](https://github.com/confluentinc/schema-registry)). You can use this library with your Kafka client app without calling an external service for schema resolution.
 
-For serialization, [Single object AVRO encoding](https://avro.apache.org/docs/current/spec.html#single_object_encoding) is used to reduce records size, only a schema id (hash) is persisted within the record.  
+For serialization [Single object AVRO encoding](https://avro.apache.org/docs/current/spec.html#single_object_encoding) is used to reduce records size, only a schema id (hash) is persisted within the record.  
+
+## Features
+
+Kaa provides essentially 3 features:
+
+- `com.davideicardi.kaa.KaaSchemaRegistry`: a simple embeddable schema registry that read and write schemas to Kafka
+- `com.davideicardi.kaa.avro.AvroSingleObjectSerializer`: an avro serializer/deserializer based on Avro4s that internally uses `KaaSchemaRegistry`
+- `com.davideicardi.kaa.kafka.GenericSerde[T]` an implementation of Kafka's `Serde[T]` based on `AvroSingleObjectSerializer`, that can be used with Kafka Stream
+
+During serialization a schema hash is generated and stored inside Kafka with the schema (key=hash, value=schema).
+When deserializing the schema is retrieved from Kafka and used for the deserialization.
+`KaaSchemaRegistry` internally runs a Kafka consumer to read all schemas that will be cached in memory.
+
+You can use `com.davideicardi.kaa.KaaSchemaRegistryAdmin` to programmatically create Kafka's schema topic.
+NOTE: if you want to create the topic manually, remember to put cleanup policy to `compact` to maintain all the schemas.
+
+## Why
+
+The main advantage of Kaa is that it doesn't require an external services to retrieve schemas. This library automatically reads and writes to Kafka. This can simplify installation and configuration of client applications. This is especially useful for applications that already interact with Kafka.
+
+Confluent Schema Registry on the other end requires you to install a dedicated service.
 
 ## Prerequisites
 
@@ -58,22 +79,7 @@ try {
 case class SuperheroV1(name: String)
 ```
 
-## Features
-
-Kaa provides essentially 3 features:
-
-- `com.davideicardi.kaa.KaaSchemaRegistry`: a simple embeddable schema registry that read and write schemas to Kafka
-- `com.davideicardi.kaa.avro.AvroSingleObjectSerializer`: an avro serializer/deserializer based on Avro4s that internally uses `KaaSchemaRegistry`
-- `com.davideicardi.kaa.kafka.GenericSerde[T]` an implementation of Kafka's `Serde[T]` based on `AvroSingleObjectSerializer`, that can be used with Kafka Stream
-
-During serialization a schema hash is generated and stored inside Kafka with the schema (key=hash, value=schema).
-When deserializing the schema is retrieved from Kafka and used for the deserialization.
-`KaaSchemaRegistry` internally runs a Kafka consumer to read all schemas that will be cached in memory.
-
-You can use `com.davideicardi.kaa.KaaSchemaRegistryAdmin` to programmatically create Kafka's schema topic.
-NOTE: if you want to create the topic manually, remember to put cleanup policy to `compact` to maintain all the schemas.
-
-## Credits
+## See also
 
 - Avro: https://avro.apache.org/
   - Single object encoding: https://avro.apache.org/docs/current/spec.html#single_object_encoding
