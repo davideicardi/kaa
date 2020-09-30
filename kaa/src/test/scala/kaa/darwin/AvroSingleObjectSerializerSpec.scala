@@ -5,16 +5,15 @@ import org.apache.avro.{Schema, SchemaNormalization}
 import org.scalatest._
 import flatspec._
 import com.davideicardi.kaa.avro.{AvroBinarySerializer, AvroSingleObjectEncoding, AvroSingleObjectSerializer}
-import com.davideicardi.kaa.{SchemaId, SchemaRegistry}
+import com.davideicardi.kaa.SchemaId
+import com.davideicardi.kaa.test.TestSchemaRegistry
 import matchers._
-
-import scala.collection.mutable
 
 case class Pokemon(name: String, mainType: String, offType: Option[String], level: Int)
 
 class AvroSingleObjectSerializerSpec extends AnyFlatSpec with should.Matchers {
 
-  val registry = new SchemaRegistryFake
+  val registry = new TestSchemaRegistry
   val dragonite = Pokemon("Dragonite", "Dragon", None, 100)
 
   val singleObjectSerializer = new AvroSingleObjectSerializer[Pokemon](registry)
@@ -40,22 +39,5 @@ class AvroSingleObjectSerializerSpec extends AnyFlatSpec with should.Matchers {
     def calcFingerprint(schema: Schema): SchemaId = {
       SchemaId(SchemaNormalization.parsingFingerprint64(schema))
     }
-  }
-}
-
-class SchemaRegistryFake extends SchemaRegistry {
-  val _schemas = new mutable.HashMap[SchemaId, Schema]
-
-  override def put(schema: Schema): SchemaId = {
-    val id = SchemaId(
-      SchemaNormalization.parsingFingerprint64(schema)
-    )
-    _schemas.put(id, schema)
-
-    id
-  }
-
-  override def get(id: SchemaId): Option[Schema] = {
-    _schemas.get(id)
   }
 }
