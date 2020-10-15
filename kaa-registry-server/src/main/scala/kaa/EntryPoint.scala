@@ -10,10 +10,10 @@ import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 object EntryPoint extends App {
   println("Kaa Schema Registry Server")
 
-  val brokers = "localhost:9092"
-  val host = "localhost"
-  val appName = "kaa-registry-server"
-  val port = 8888
+  val brokers = sys.env.getOrElse("KAFKA_BROKERS", "localhost:9092")
+  val interface = sys.env.getOrElse("INTERFACE", "localhost")
+  val port = sys.env.getOrElse("PORT", "8888").toInt
+  val appName = sys.env.getOrElse("CLIENT_ID", "kaa-registry-server")
 
   val admin = new KaaSchemaRegistryAdmin(brokers)
   if (!admin.topicExists()) admin.createTopic()
@@ -23,12 +23,12 @@ object EntryPoint extends App {
 
   val doneSignal = new CountDownLatch(1)
 
-  val schemaRegistry = new KaaSchemaRegistry(brokers)
+  val schemaRegistry = KaaSchemaRegistry.create(brokers, appName)
   try {
     val controller = new KaaController(schemaRegistry)
 
     val httpServer = new KaaHttpServer(
-      host,
+      interface,
       port,
       Seq(controller)
     )
