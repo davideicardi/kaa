@@ -4,7 +4,11 @@ import com.davideicardi.kaa.{SchemaNotFoundException, SchemaRegistry}
 import org.apache.avro.Schema
 import org.apache.avro.generic.GenericRecord
 
-class GenericAvroSingleObjectSerializer(schemaRegistry: SchemaRegistry){
+class GenericAvroSingleObjectSerializer
+(
+  schemaRegistry: SchemaRegistry,
+  encoding: AvroSingleObjectEncoding = AvroSingleObjectEncoding.default
+){
 
   private val binarySerializer = new GenericAvroBinarySerializer()
 
@@ -12,11 +16,11 @@ class GenericAvroSingleObjectSerializer(schemaRegistry: SchemaRegistry){
     val currentSchemaId = schemaRegistry.put(record.getSchema)
     val bytes = binarySerializer.write(record)
 
-    AvroSingleObjectEncoding.encode(bytes, currentSchemaId)
+    encoding.encode(bytes, currentSchemaId)
   }
 
   def deserialize(bytes: Array[Byte], readerSchema: Option[Schema] = None): GenericRecord = {
-    val (schemaId, serialized) = AvroSingleObjectEncoding.decode(bytes)
+    val (schemaId, serialized) = encoding.decode(bytes)
     val schema = schemaRegistry.get(schemaId)
       .getOrElse(throw new SchemaNotFoundException(s"Schema $schemaId not found in registry"))
 

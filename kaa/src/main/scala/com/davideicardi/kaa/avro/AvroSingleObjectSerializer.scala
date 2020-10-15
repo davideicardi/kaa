@@ -5,19 +5,21 @@ import com.davideicardi.kaa.SchemaRegistry
 import com.davideicardi.kaa.SchemaNotFoundException
 
 class AvroSingleObjectSerializer[T >: Null : SchemaFor : Encoder : Decoder]
-(schemaRegistry: SchemaRegistry){
-
+(
+  schemaRegistry: SchemaRegistry,
+  encoding: AvroSingleObjectEncoding = AvroSingleObjectEncoding.default
+){
   private val binarySerializer = new AvroBinarySerializer[T]()
   private lazy val currentSchemaId = schemaRegistry.put(binarySerializer.currentSchema)
 
   def serialize(obj: T): Array[Byte] = {
     val bytes = binarySerializer.write(obj)
 
-    AvroSingleObjectEncoding.encode(bytes, currentSchemaId)
+    encoding.encode(bytes, currentSchemaId)
   }
 
   def deserialize(bytes: Array[Byte]): T = {
-    val (schemaId, serialized) = AvroSingleObjectEncoding.decode(bytes)
+    val (schemaId, serialized) = encoding.decode(bytes)
     val schema = schemaRegistry.get(schemaId)
       .getOrElse(throw new SchemaNotFoundException(s"Schema $schemaId not found in registry"))
 
