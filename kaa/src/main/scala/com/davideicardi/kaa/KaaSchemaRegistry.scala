@@ -114,8 +114,7 @@ class KaaSchemaRegistry(
 
   protected def fillConsumerProps(): Properties = {
 
-    if (!consumerProps.containsKey(ConsumerConfig.CLIENT_ID_CONFIG))
-      consumerProps.put(ConsumerConfig.CLIENT_ID_CONFIG, KaaSchemaRegistry.DEFAULT_CLIENT_ID)
+    consumerProps.putIfAbsent(ConsumerConfig.CLIENT_ID_CONFIG, KaaSchemaRegistry.DEFAULT_CLIENT_ID)
 
     consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString)
     consumerProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false")
@@ -129,8 +128,7 @@ class KaaSchemaRegistry(
   }
 
   protected def fillProducerProps(): Properties = {
-    if (!producerProps.containsKey(ProducerConfig.CLIENT_ID_CONFIG))
-      producerProps.put(ProducerConfig.CLIENT_ID_CONFIG, KaaSchemaRegistry.DEFAULT_CLIENT_ID)
+    producerProps.putIfAbsent(ProducerConfig.CLIENT_ID_CONFIG, KaaSchemaRegistry.DEFAULT_CLIENT_ID)
 
     producerProps
   }
