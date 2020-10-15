@@ -12,7 +12,7 @@ object SampleApp {
         val admin = new KaaSchemaRegistryAdmin(brokers)
         if (!admin.topicExists()) admin.createTopic()
 
-        val schemaRegistry = new KaaSchemaRegistry(brokers)
+        val schemaRegistry = KaaSchemaRegistry.create(brokers, "sample")
         try {
             val serializerV1 = new AvroSingleObjectSerializer[SuperheroV1](schemaRegistry)
             val serializerV2 = new AvroSingleObjectSerializer[SuperheroV2](schemaRegistry)

@@ -1,37 +1,67 @@
 package com.davideicardi.kaa
 
+import java.lang
+
 import org.apache.avro.Schema
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.apache.avro.SchemaNormalization
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import java.util.{Collections, Properties, UUID}
 import java.time.{Duration => JavaDuration}
-import com.github.blemale.scaffeine.{ Cache, Scaffeine }
+
+import com.github.blemale.scaffeine.{Cache, Scaffeine}
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.{LongDeserializer, StringDeserializer}
 import org.apache.kafka.common.serialization.{LongSerializer, StringSerializer}
+
 import scala.concurrent.duration._
 import com.davideicardi.kaa.utils.Retry
 import java.util.concurrent.atomic.AtomicBoolean
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Await
+
+import com.davideicardi.kaa.KaaSchemaRegistry._
+
+import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
 import com.davideicardi.kaa.utils.RetryConfig
 
 object KaaSchemaRegistry {
   val DEFAULT_TOPIC_NAME = "schemas-v1"
+  val DEFAULT_CLIENT_ID = "KaaSchemaRegistry"
+  val DEFAULT_POLL_INTERVAL: FiniteDuration = 5.second
+  val DEFAULT_RETRY_CONFIG: RetryConfig = RetryConfig(5, 2.second)
+
+  def create(
+            brokers: String,
+            clientId: String,
+            topic: String = DEFAULT_TOPIC_NAME,
+            pollInterval: Duration = DEFAULT_POLL_INTERVAL,
+            getRetry: RetryConfig = DEFAULT_RETRY_CONFIG
+          ): KaaSchemaRegistry = {
+    val consumerProps = new Properties()
+    consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers)
+    consumerProps.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId)
+
+    val producerProps = new Properties()
+    producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers)
+    producerProps.put(ProducerConfig.CLIENT_ID_CONFIG, clientId)
+
+    new KaaSchemaRegistry(
+      producerProps = producerProps,
+      consumerProps = consumerProps,
+      topic = topic,
+      pollInterval,
+      getRetry)
+  }
 }
 
 class KaaSchemaRegistry(
-  brokers: String,
-  topic: String = KaaSchemaRegistry.DEFAULT_TOPIC_NAME,
-  cliendId: String = "KaaSchemaRegistry",
-  pollInterval: Duration = 5.second,
-  getRetry: RetryConfig = RetryConfig(5, 2.second)
+  producerProps: Properties,
+  consumerProps: Properties,
+  topic: String = DEFAULT_TOPIC_NAME,
+  pollInterval: Duration = DEFAULT_POLL_INTERVAL,
+  getRetry: RetryConfig = DEFAULT_RETRY_CONFIG
 ) extends SchemaRegistry {
-
-  implicit private val ec = ExecutionContext.global
+  implicit private val ec: ExecutionContextExecutor = ExecutionContext.global
 
   private val producer = createProducer()
   private val consumer = createConsumer()
@@ -45,12 +75,12 @@ class KaaSchemaRegistry(
       while (!stopping.get()) {
         val records = consumer.poll(jPollInterval)
 
-        records.forEach((record) => {
+        records.forEach(record => {
           cache.put(record.key(), record.value())
         })
       }
 
-      consumer.close();
+      consumer.close()
   }
 
   def shutdown(): Unit = {
@@ -78,30 +108,30 @@ class KaaSchemaRegistry(
     }
   }
 
-  protected def createConsumer() = {
-    new KafkaConsumer(consumerProps(), new LongDeserializer(), new StringDeserializer())    
+  protected def createConsumer(): KafkaConsumer[lang.Long, String] = {
+    new KafkaConsumer(fillConsumerProps(), new LongDeserializer(), new StringDeserializer())
   }
 
-  protected def consumerProps(): Properties = {
-    val props = new Properties()
-    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers)
-    props.put(ConsumerConfig.CLIENT_ID_CONFIG, cliendId)
-    props.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString());
-    props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false")
-    props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+  protected def fillConsumerProps(): Properties = {
 
-    props
+    if (!consumerProps.containsKey(ConsumerConfig.CLIENT_ID_CONFIG))
+      consumerProps.put(ConsumerConfig.CLIENT_ID_CONFIG, KaaSchemaRegistry.DEFAULT_CLIENT_ID)
+
+    consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString)
+    consumerProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false")
+    consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+
+    consumerProps
   }
 
-  protected def createProducer() = {
-    new KafkaProducer(producerProps(), new LongSerializer(), new StringSerializer())    
+  protected def createProducer(): KafkaProducer[lang.Long, String] = {
+    new KafkaProducer(fillProducerProps(), new LongSerializer(), new StringSerializer())
   }
 
-  protected def producerProps(): Properties = {
-    val props = new Properties()
-    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers)
-    props.put(ProducerConfig.CLIENT_ID_CONFIG, cliendId)
- 
-    props
+  protected def fillProducerProps(): Properties = {
+    if (!producerProps.containsKey(ProducerConfig.CLIENT_ID_CONFIG))
+      producerProps.put(ProducerConfig.CLIENT_ID_CONFIG, KaaSchemaRegistry.DEFAULT_CLIENT_ID)
+
+    producerProps
   }
 }

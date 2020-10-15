@@ -23,7 +23,7 @@ class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with Before
   }
 
   "KaaSchemaRegistry" should "put and retrieve a schema" in {
-    val target = new KaaSchemaRegistry(BROKERS, TOPIC_NAME)
+    val target = KaaSchemaRegistry.create(BROKERS, TOPIC_NAME)
 
     try {
       val schema = AvroSchema[Foo]
@@ -39,7 +39,7 @@ class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with Before
   }
 
   it should "return None for not existing schema" in {
-    val target = new KaaSchemaRegistry(BROKERS, TOPIC_NAME)
+    val target = KaaSchemaRegistry.create(BROKERS, TOPIC_NAME)
 
     try {
       target.get(SchemaId(999L)) match {

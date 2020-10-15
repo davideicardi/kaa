@@ -12,7 +12,7 @@ trait RouteController {
 }
 
 class KaaHttpServer(
-                      host: String,
+                     interface: String,
                       port: Int,
                       controllers: Seq[RouteController],
                     )
@@ -23,10 +23,10 @@ class KaaHttpServer(
     val route = concat(controllers.map(_.createRoute()):_*)
 
     bindingFuture = Some {
-      Http().newServerAt(host, port)
+      Http().newServerAt(interface, port)
         .bindFlow(route)
     }
-    println(s"Server online at http://${host}:${port}/\n")
+    println(s"Server online at http://$interface:$port/\n")
 
     Runtime.getRuntime.addShutdownHook(new Thread(() => {
       stop()
