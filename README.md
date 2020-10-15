@@ -5,7 +5,7 @@
 (Kafka Avro4s Schema Registry)
 
 Scala client library that provide an Avro schema registry with Kafka persistency and [Avro4s](https://github.com/sksamuel/avro4s) serializer support.
-It allows to share avro schemas across multiple applications without third party software (it can replace [Confluent Schema Registry](https://github.com/confluentinc/schema-registry)). You can use this library with your Kafka client app without calling an external service for schema resolution.
+It allows resolving AVRO schemas across multiple applications without third party software (it can replace [Confluent Schema Registry](https://github.com/confluentinc/schema-registry)). You can use this library with your Kafka client app without calling an external service for schema resolution.
 
 For serialization [Single object AVRO encoding](https://avro.apache.org/docs/current/spec.html#single_object_encoding) is used to reduce records size, only a schema id (hash) is persisted within the record.  
 
@@ -14,7 +14,8 @@ For serialization [Single object AVRO encoding](https://avro.apache.org/docs/cur
 Kaa provides essentially 3 features:
 
 - `com.davideicardi.kaa.KaaSchemaRegistry`: a simple embeddable schema registry that read and write schemas to Kafka
-- `com.davideicardi.kaa.avro.AvroSingleObjectSerializer`: an avro serializer/deserializer based on Avro4s that internally uses `KaaSchemaRegistry`
+- `com.davideicardi.kaa.avro.AvroSingleObjectSerializer[T]`: an avro serializer/deserializer for case classes, based on Avro4s, that internally uses `KaaSchemaRegistry` for schema resolution
+- `com.davideicardi.kaa.avro.GenericAvroSingleObjectSerializer`: an avro serializer/deserializer for `GenericRecord` classes that internally uses `KaaSchemaRegistry` for schema resolution
 - `com.davideicardi.kaa.kafka.GenericSerde[T]` an implementation of Kafka's `Serde[T]` based on `AvroSingleObjectSerializer`, that can be used with Kafka Stream
 
 During serialization a schema hash is generated and stored inside Kafka with the schema (key=hash, value=schema).
