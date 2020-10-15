@@ -1,19 +1,24 @@
 package com.davideicardi.kaa
 
 import java.util.{Collections, Properties, Optional}
-import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig, NewTopic}
+import org.apache.kafka.clients.admin.{AdminClient, NewTopic}
 import org.apache.kafka.common.config.TopicConfig
 
 import com.davideicardi.kaa.utils.CollectionConverters
 
 class KaaSchemaRegistryAdmin(
-  brokers: String,
+  adminProps: Properties,
   topic: String = KaaSchemaRegistry.DEFAULT_TOPIC_NAME
 ) {
-  val props = new Properties()
-  props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, brokers)
-  props.put("delete.enable.topic", "true")
-  private val adminClient = AdminClient.create(props)
+  def this(brokers: String) = {
+    this(
+      KaaSchemaRegistry.createProps(brokers, KaaSchemaRegistry.DEFAULT_CLIENT_ID),
+      topic = KaaSchemaRegistry.DEFAULT_TOPIC_NAME,
+    )
+  }
+
+  adminProps.putIfAbsent("delete.enable.topic", "true")
+  private val adminClient = AdminClient.create(adminProps)
 
   def createTopic(): Unit = {
     val NUMBER_OF_PARTITIONS = 1
@@ -37,5 +42,9 @@ class KaaSchemaRegistryAdmin(
 
   def deleteTopic(): Unit = {
     val _ = adminClient.deleteTopics(Collections.singletonList(topic)).all().get()
+  }
+
+  def close(): Unit = {
+    adminClient.close()
   }
 }

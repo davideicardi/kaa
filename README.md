@@ -80,6 +80,12 @@ try {
 case class SuperheroV1(name: String)
 ```
 
+## Http schema server
+
+For a simple server implementation see `./kaa-registry-server`.
+
+Use `GET /schemas/ids/{schemaId}` method to retrieve schemas. 
+
 ## See also
 
 - Avro: https://avro.apache.org/
@@ -112,4 +118,10 @@ Run example application:
 docker-compose up -d
 sbt sample/run
 docker-compose down
+```
+
+Run http server:
+
+```
+sbt kaaRegistryServer/run
 ```

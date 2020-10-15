@@ -1,17 +1,24 @@
-package com.davideicardi.kaa.darwin
+import java.util.UUID
 
+import com.davideicardi.kaa.{KaaSchemaRegistry, KaaSchemaRegistryAdmin, SchemaId}
 import com.sksamuel.avro4s.AvroSchema
 import org.scalatest._
-import flatspec._
-import matchers._
-import com.davideicardi.kaa.{KaaSchemaRegistry, KaaSchemaRegistryAdmin, SchemaId}
-import java.util.UUID
+import org.scalatest.flatspec._
+import org.scalatest.matchers._
 
 class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with BeforeAndAfterAll {
 
-  val BROKERS = "localhost:9092"
-  val TOPIC_NAME = "schema-registry-test" + UUID.randomUUID().toString()
-  val admin = new KaaSchemaRegistryAdmin(BROKERS, TOPIC_NAME)
+  private val BROKERS = "localhost:9092"
+  private val TOPIC_NAME = "schema-registry-test" + UUID.randomUUID().toString
+  private val props = KaaSchemaRegistry.createProps(BROKERS, "KaaSchemaRegistrySpec")
+  private val admin = new KaaSchemaRegistryAdmin(
+    props,
+    TOPIC_NAME,
+  )
+
+  private def createTarget() = {
+    new KaaSchemaRegistry(props, props, topic = TOPIC_NAME)
+  }
 
   override protected def beforeAll(): Unit = {
     if (!admin.topicExists())
@@ -23,7 +30,7 @@ class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with Before
   }
 
   "KaaSchemaRegistry" should "put and retrieve a schema" in {
-    val target = KaaSchemaRegistry.create(BROKERS, TOPIC_NAME)
+    val target = createTarget()
 
     try {
       val schema = AvroSchema[Foo]
@@ -34,12 +41,12 @@ class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with Before
         case Some(schemaRetrieved) => schemaRetrieved should be (schema)
       }
     } finally {
-      target.shutdown()
+      target.close()
     }
   }
 
   it should "return None for not existing schema" in {
-    val target = KaaSchemaRegistry.create(BROKERS, TOPIC_NAME)
+    val target = createTarget()
 
     try {
       target.get(SchemaId(999L)) match {
@@ -47,7 +54,7 @@ class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with Before
         case Some(_) => fail("Schema should not be retrieved")
       }
     } finally {
-      target.shutdown()
+      target.close()
     }
   }
 

@@ -7,12 +7,16 @@ object SampleApp {
     def main(args: Array[String]): Unit = {
         println("KaaSchemaRegistry SampleApp")
 
-        val brokers = "localhost:9092"
+        val brokers = sys.env.getOrElse("KAFKA_BROKERS", "localhost:9092")
 
         val admin = new KaaSchemaRegistryAdmin(brokers)
-        if (!admin.topicExists()) admin.createTopic()
+        try {
+            if (!admin.topicExists()) admin.createTopic()
+        } finally {
+            admin.close()
+        }
 
-        val schemaRegistry = KaaSchemaRegistry.create(brokers, "sample")
+        val schemaRegistry = new KaaSchemaRegistry(brokers)
         try {
             val serializerV1 = new AvroSingleObjectSerializer[SuperheroV1](schemaRegistry)
             val serializerV2 = new AvroSingleObjectSerializer[SuperheroV2](schemaRegistry)
@@ -39,7 +43,7 @@ object SampleApp {
             println(s"V1 -> V2 $resultV2V1")
 
         } finally {
-            schemaRegistry.shutdown()
+            schemaRegistry.close()
         }
     }
 }
