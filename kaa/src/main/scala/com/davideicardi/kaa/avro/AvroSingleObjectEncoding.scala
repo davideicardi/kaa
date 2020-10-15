@@ -11,7 +11,7 @@ object AvroSingleObjectEncoding {
    * Note: this is not the same encoding using by Confluent Avro serializer.
    * Confluent Avro serializer uses 0x00 as magic byte and and id of 4 bytes (incremental? not an hash).
    */
-  val default : AvroSingleObjectEncoding = {
+  val AVRO_OFFICIAL : AvroSingleObjectEncoding = {
     new AvroSingleObjectEncoding(
       Array(0xC3.toByte, 0x01.toByte),
       ByteOrder.LITTLE_ENDIAN,

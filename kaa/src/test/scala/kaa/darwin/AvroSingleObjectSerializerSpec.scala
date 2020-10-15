@@ -28,7 +28,7 @@ class AvroSingleObjectSerializerSpec extends AnyFlatSpec with should.Matchers {
   it should "serialize a class with a single object encoding" in {
     val encoded = singleObjectSerializer.serialize(dragonite)
 
-    val (schemaId, bin) = AvroSingleObjectEncoding.default.decode(encoded)
+    val (schemaId, bin) = AvroSingleObjectEncoding.AVRO_OFFICIAL.decode(encoded)
     val binarySerializer = new AvroBinarySerializer[Pokemon]
 
     schemaId should be (AvroUtils.calcFingerprint(AvroSchema[Pokemon]))
