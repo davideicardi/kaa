@@ -7,7 +7,7 @@ import com.davideicardi.kaa.SchemaNotFoundException
 class AvroSingleObjectSerializer[T >: Null : SchemaFor : Encoder : Decoder]
 (
   schemaRegistry: SchemaRegistry,
-  encoding: AvroSingleObjectEncoding = AvroSingleObjectEncoding.default
+  encoding: AvroSingleObjectEncoding = AvroSingleObjectEncoding.AVRO_OFFICIAL
 ){
   private val binarySerializer = new AvroBinarySerializer[T]()
   private lazy val currentSchemaId = schemaRegistry.put(binarySerializer.currentSchema)

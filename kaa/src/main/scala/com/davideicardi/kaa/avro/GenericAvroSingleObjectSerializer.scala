@@ -7,8 +7,11 @@ import org.apache.avro.generic.GenericRecord
 class GenericAvroSingleObjectSerializer
 (
   schemaRegistry: SchemaRegistry,
-  encoding: AvroSingleObjectEncoding = AvroSingleObjectEncoding.default
+  encoding: AvroSingleObjectEncoding,
 ){
+  def this(schemaRegistry: SchemaRegistry) = {
+    this(schemaRegistry, AvroSingleObjectEncoding.AVRO_OFFICIAL)
+  }
 
   private val binarySerializer = new GenericAvroBinarySerializer()
 
@@ -19,7 +22,10 @@ class GenericAvroSingleObjectSerializer
     encoding.encode(bytes, currentSchemaId)
   }
 
-  def deserialize(bytes: Array[Byte], readerSchema: Option[Schema] = None): GenericRecord = {
+  def deserialize(bytes: Array[Byte]): GenericRecord = {
+    deserialize(bytes, None)
+  }
+  def deserialize(bytes: Array[Byte], readerSchema: Option[Schema]): GenericRecord = {
     val (schemaId, serialized) = encoding.decode(bytes)
     val schema = schemaRegistry.get(schemaId)
       .getOrElse(throw new SchemaNotFoundException(s"Schema $schemaId not found in registry"))

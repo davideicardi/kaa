@@ -25,9 +25,9 @@ object SampleApp {
             val bytesV2 = serializerV2.serialize(SuperheroV2("Spiderman", "Peter Parker"))
 
             // v1 schema
-            val (schemaIdv1, _) = AvroSingleObjectEncoding.default.decode(bytesV1)
+            val (schemaIdv1, _) = AvroSingleObjectEncoding.AVRO_OFFICIAL.decode(bytesV1)
             println(s"v1 $schemaIdv1")
-            val (schemaIdv2, _) = AvroSingleObjectEncoding.default.decode(bytesV2)
+            val (schemaIdv2, _) = AvroSingleObjectEncoding.AVRO_OFFICIAL.decode(bytesV2)
             println(s"v2 $schemaIdv2")
 
             // normal deserialization
