@@ -68,7 +68,7 @@ class GenericAvroSingleObjectSerializerSpec extends AnyFlatSpec with should.Matc
 
     val encoded = singleObjectSerializer.serialize(record)
 
-    val (schemaId, bin) = AvroSingleObjectEncoding.decode(encoded)
+    val (schemaId, bin) = AvroSingleObjectEncoding.default.decode(encoded)
     val binarySerializer = new GenericAvroBinarySerializer
 
     schemaId should be (AvroUtils.calcFingerprint(schemaV1))

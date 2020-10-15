@@ -92,6 +92,25 @@ lazy val sample = project
   .settings(
     name := "sample",
     publish / skip := true,
+    libraryDependencies ++= Seq(
+      "ch.qos.logback" % "logback-classic" % "1.2.3",
+    ),
+  )
+  .dependsOn(kaa)
+
+
+val AkkaVersion = "2.6.8"
+val AkkaHttpVersion = "10.2.1"
+lazy val kaaRegistryServer = (project in file("kaa-registry-server"))
+  .settings(
+    name := "kaa-registry-server",
+    publish / skip := true,
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
+      "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
+      "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion,
+      "ch.qos.logback" % "logback-classic" % "1.2.3",
+    ),
   )
   .dependsOn(kaa)
 
