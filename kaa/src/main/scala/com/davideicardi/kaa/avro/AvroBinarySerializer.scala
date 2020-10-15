@@ -1,6 +1,7 @@
 package com.davideicardi.kaa.avro
 
 import java.io.ByteArrayOutputStream
+
 import com.sksamuel.avro4s._
 import org.apache.avro._
 
