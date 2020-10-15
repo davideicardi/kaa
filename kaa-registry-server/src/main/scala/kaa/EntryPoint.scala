@@ -13,17 +13,22 @@ object EntryPoint extends App {
   val brokers = sys.env.getOrElse("KAFKA_BROKERS", "localhost:9092")
   val interface = sys.env.getOrElse("INTERFACE", "localhost")
   val port = sys.env.getOrElse("PORT", "8888").toInt
-  val appName = sys.env.getOrElse("CLIENT_ID", "kaa-registry-server")
+  val appName = sys.env.getOrElse("APP_NAME", "kaa-registry-server")
+  val props = KaaSchemaRegistry.createProps(brokers, appName)
 
-  val admin = new KaaSchemaRegistryAdmin(brokers)
-  if (!admin.topicExists()) admin.createTopic()
+  val admin = new KaaSchemaRegistryAdmin(props)
+  try {
+    if (!admin.topicExists()) admin.createTopic()
+  } finally {
+    admin.close()
+  }
 
   implicit val system: ActorSystem = ActorSystem(appName)
   implicit val ec: ExecutionContextExecutor = ExecutionContext.global
 
   val doneSignal = new CountDownLatch(1)
 
-  val schemaRegistry = KaaSchemaRegistry.create(brokers, appName)
+  val schemaRegistry = new KaaSchemaRegistry(brokers)
   try {
     val controller = new KaaController(schemaRegistry)
 
@@ -42,6 +47,6 @@ object EntryPoint extends App {
 
     doneSignal.await()
   } finally {
-    schemaRegistry.shutdown()
+    schemaRegistry.close()
   }
 }

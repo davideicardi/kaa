@@ -23,6 +23,7 @@ import com.davideicardi.kaa.KaaSchemaRegistry._
 
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
 import com.davideicardi.kaa.utils.RetryConfig
+import org.apache.kafka.clients.CommonClientConfigs
 
 object KaaSchemaRegistry {
   val DEFAULT_TOPIC_NAME = "schemas-v1"
@@ -30,27 +31,14 @@ object KaaSchemaRegistry {
   val DEFAULT_POLL_INTERVAL: FiniteDuration = 5.second
   val DEFAULT_RETRY_CONFIG: RetryConfig = RetryConfig(5, 2.second)
 
-  def create(
+  def createProps(
             brokers: String,
-            clientId: String,
-            topic: String = DEFAULT_TOPIC_NAME,
-            pollInterval: Duration = DEFAULT_POLL_INTERVAL,
-            getRetry: RetryConfig = DEFAULT_RETRY_CONFIG
-          ): KaaSchemaRegistry = {
+            clientId: String = DEFAULT_CLIENT_ID,
+          ): Properties = {
     val consumerProps = new Properties()
-    consumerProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers)
-    consumerProps.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId)
-
-    val producerProps = new Properties()
-    producerProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers)
-    producerProps.put(ProducerConfig.CLIENT_ID_CONFIG, clientId)
-
-    new KaaSchemaRegistry(
-      producerProps = producerProps,
-      consumerProps = consumerProps,
-      topic = topic,
-      pollInterval,
-      getRetry)
+    consumerProps.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, brokers)
+    consumerProps.put(CommonClientConfigs.CLIENT_ID_CONFIG, clientId)
+    consumerProps
   }
 }
 
@@ -61,6 +49,24 @@ class KaaSchemaRegistry(
   pollInterval: Duration = DEFAULT_POLL_INTERVAL,
   getRetry: RetryConfig = DEFAULT_RETRY_CONFIG
 ) extends SchemaRegistry {
+
+  def this(producerProps: Properties,
+           consumerProps: Properties) = {
+    this(
+      producerProps = producerProps,
+      consumerProps = consumerProps,
+      topic = DEFAULT_TOPIC_NAME,
+      pollInterval = DEFAULT_POLL_INTERVAL,
+      getRetry = DEFAULT_RETRY_CONFIG,
+    )
+  }
+  def this(brokers: String) = {
+    this(
+      producerProps = createProps(brokers),
+      consumerProps = createProps(brokers),
+    )
+  }
+
   implicit private val ec: ExecutionContextExecutor = ExecutionContext.global
 
   private val producer = createProducer()
@@ -83,7 +89,7 @@ class KaaSchemaRegistry(
       consumer.close()
   }
 
-  def shutdown(): Unit = {
+  def close(): Unit = {
     stopping.set(true)
     Await.result(startConsumerFuture, 10.seconds)
   }
