@@ -18,19 +18,22 @@ class GenericSerde[T >: Null : SchemaFor : Encoder : Decoder]
   def deserializer: Deserializer[T] = this
 
   override def deserialize(topic: String, data: Array[Byte]): T = {
-    avroSerializer.deserialize(data)
+    if (data == null || data.length == 0) {
+      null
+    } else {
+      avroSerializer.deserialize(data)
+    }
   }
 
   override def serialize(topic: String, data: T): Array[Byte] = {
-    avroSerializer.serialize(data)
+    if (data == null) {
+      Array()
+    } else {
+      avroSerializer.serialize(data)
+    }
   }
 
   override def close(): Unit = ()
 
   override def configure(configs: java.util.Map[String, _], isKey: Boolean): Unit = ()
 }
-
-
-
-
-
