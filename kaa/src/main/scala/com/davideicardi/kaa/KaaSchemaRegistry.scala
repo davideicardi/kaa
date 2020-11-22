@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import com.davideicardi.kaa.KaaSchemaRegistry._
 
-import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutor, Future}
+import scala.concurrent._
 import com.davideicardi.kaa.utils.RetryConfig
 import org.apache.kafka.clients.CommonClientConfigs
 
@@ -77,21 +77,22 @@ class KaaSchemaRegistry(
 
   private def startConsumer(): Future[Unit] = Future {
     consumer.subscribe(Collections.singletonList(topic))
-      val jPollInterval = JavaDuration.ofMillis(pollInterval.toMillis)
-      while (!stopping.get()) {
-        val records = consumer.poll(jPollInterval)
+    val jPollInterval = JavaDuration.ofMillis(pollInterval.toMillis)
+    while (!stopping.get()) {
+      val records = consumer.poll(jPollInterval)
 
-        records.forEach(record => {
-          cache.put(record.key(), record.value())
-        })
-      }
-
-      consumer.close()
+      records.forEach(record => {
+        cache.put(record.key(), record.value())
+      })
+    }
   }
 
-  def close(): Unit = {
+  def close(maxWait: Duration = 10.seconds): Unit = {
     stopping.set(true)
-    Await.result(startConsumerFuture, 10.seconds)
+    Await.result(startConsumerFuture, maxWait)
+    val maxWaitJava = JavaDuration.ofMillis(maxWait.toMillis)
+    consumer.close(maxWaitJava)
+    producer.close(maxWaitJava)
   }
 
   override def put(schema: Schema): SchemaId = {
