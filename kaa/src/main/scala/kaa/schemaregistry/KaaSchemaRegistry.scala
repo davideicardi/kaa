@@ -35,10 +35,10 @@ object KaaSchemaRegistry {
             brokers: String,
             clientId: String = DEFAULT_CLIENT_ID,
           ): Properties = {
-    val consumerProps = new Properties()
-    consumerProps.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, brokers)
-    consumerProps.put(CommonClientConfigs.CLIENT_ID_CONFIG, clientId)
-    consumerProps
+    val props = new Properties()
+    props.put(CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, brokers)
+    props.put(CommonClientConfigs.CLIENT_ID_CONFIG, clientId)
+    props
   }
 }
 
