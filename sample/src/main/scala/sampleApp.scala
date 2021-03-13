@@ -1,6 +1,6 @@
-import com.davideicardi.kaa.avro.{AvroSingleObjectEncoding, AvroSingleObjectSerializer}
-import com.davideicardi.kaa.KaaSchemaRegistry
-import com.davideicardi.kaa.KaaSchemaRegistryAdmin
+import kaa.schemaregistry.avro.{AvroSingleObjectEncoding, AvroSingleObjectSerializer}
+import kaa.schemaregistry.KaaSchemaRegistry
+import kaa.schemaregistry.KaaSchemaRegistryAdmin
 
 object SampleApp {
     
