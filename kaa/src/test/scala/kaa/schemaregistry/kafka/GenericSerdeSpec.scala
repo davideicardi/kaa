@@ -3,7 +3,6 @@ package kaa.schemaregistry.kafka
 import org.scalatest._
 import flatspec._
 import matchers._
-import kaa.schemaregistry.kafka.GenericSerde
 import kaa.schemaregistry.test.TestSchemaRegistry
 
 class GenericSerdeSpec extends AnyFlatSpec with should.Matchers {
