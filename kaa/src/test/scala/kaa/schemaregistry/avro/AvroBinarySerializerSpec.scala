@@ -4,7 +4,6 @@ import com.sksamuel.avro4s.AvroSchema
 import org.scalatest._
 import flatspec._
 import matchers._
-import kaa.schemaregistry.avro.AvroBinarySerializer
 
 class AvroBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
 

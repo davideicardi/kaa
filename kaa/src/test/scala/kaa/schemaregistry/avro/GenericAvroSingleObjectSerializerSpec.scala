@@ -1,7 +1,6 @@
 package kaa.schemaregistry.avro
 
 import kaa.schemaregistry.SchemaId
-import kaa.schemaregistry.avro.{AvroSingleObjectEncoding, GenericAvroBinarySerializer, GenericAvroSingleObjectSerializer}
 import kaa.schemaregistry.test.TestSchemaRegistry
 import org.apache.avro.generic.GenericData
 import org.apache.avro.{Schema, SchemaNormalization}

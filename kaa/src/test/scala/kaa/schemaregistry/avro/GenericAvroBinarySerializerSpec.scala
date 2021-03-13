@@ -1,6 +1,5 @@
 package kaa.schemaregistry.avro
 
-import kaa.schemaregistry.avro.GenericAvroBinarySerializer
 import org.apache.avro.Schema
 import org.apache.avro.generic.GenericData
 import org.scalatest.flatspec._

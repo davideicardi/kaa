@@ -4,7 +4,6 @@ import com.sksamuel.avro4s.AvroSchema
 import org.apache.avro.{Schema, SchemaNormalization}
 import org.scalatest._
 import flatspec._
-import kaa.schemaregistry.avro.{AvroBinarySerializer, AvroSingleObjectEncoding, AvroSingleObjectSerializer}
 import kaa.schemaregistry.SchemaId
 import kaa.schemaregistry.test.TestSchemaRegistry
 import matchers._
