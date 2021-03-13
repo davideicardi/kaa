@@ -1,6 +1,6 @@
 import java.util.UUID
 
-import com.davideicardi.kaa.{KaaSchemaRegistry, KaaSchemaRegistryAdmin, SchemaId}
+import kaa.schemaregistry.{KaaSchemaRegistry, KaaSchemaRegistryAdmin, SchemaId}
 import com.sksamuel.avro4s.AvroSchema
 import org.scalatest._
 import org.scalatest.flatspec._

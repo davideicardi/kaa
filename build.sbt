@@ -68,6 +68,7 @@ val kafkaVersion = "2.4.0" // NOTE: there is a dependencies to kafka also from a
 
 val testDependencies = Seq(
   "org.scalatest" %% "scalatest" % "3.2.0" % "it,test",
+  "ch.qos.logback" % "logback-classic" % "1.2.3" % "it" exclude("org.slf4j", "slf4j-api"),
 )
 
 val dependencies = Seq(
@@ -109,12 +110,11 @@ lazy val kaaRegistryServer = (project in file("kaa-registry-server"))
       "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
       "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,
       "com.typesafe.akka" %% "akka-http-spray-json" % AkkaHttpVersion,
-      "ch.qos.logback" % "logback-classic" % "1.2.3",
     ),
   )
   .dependsOn(kaa)
 
-lazy val root = (project in file("."))
+lazy val kaaRoot = (project in file("."))
   .aggregate(kaa, sample)
   .settings(
     publish / skip := true,

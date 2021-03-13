@@ -13,16 +13,16 @@ For serialization [Single object AVRO encoding](https://avro.apache.org/docs/cur
 
 Kaa provides essentially 3 features:
 
-- `com.davideicardi.kaa.KaaSchemaRegistry`: a simple embeddable schema registry that read and write schemas to Kafka
-- `com.davideicardi.kaa.avro.AvroSingleObjectSerializer[T]`: an avro serializer/deserializer for case classes, based on Avro4s, that internally uses `KaaSchemaRegistry` for schema resolution
-- `com.davideicardi.kaa.avro.GenericAvroSingleObjectSerializer`: an avro serializer/deserializer for `GenericRecord` classes that internally uses `KaaSchemaRegistry` for schema resolution
-- `com.davideicardi.kaa.kafka.GenericSerde[T]` an implementation of Kafka's `Serde[T]` based on `AvroSingleObjectSerializer`, that can be used with Kafka Stream
+- `kaa.schemaregistry.KaaSchemaRegistry`: a simple embeddable schema registry that read and write schemas to Kafka
+- `kaa.schemaregistry.avro.AvroSingleObjectSerializer[T]`: an avro serializer/deserializer for case classes, based on Avro4s, that internally uses `KaaSchemaRegistry` for schema resolution
+- `kaa.schemaregistry.avro.GenericAvroSingleObjectSerializer`: an avro serializer/deserializer for `GenericRecord` classes that internally uses `KaaSchemaRegistry` for schema resolution
+- `kaa.schemaregistry.kafka.GenericSerde[T]` an implementation of Kafka's `Serde[T]` based on `AvroSingleObjectSerializer`, that can be used with Kafka Stream
 
 During serialization a schema hash is generated and stored inside Kafka with the schema (key=hash, value=schema).
 When deserializing the schema is retrieved from Kafka and used for the deserialization.
 `KaaSchemaRegistry` internally runs a Kafka consumer to read all schemas that will be cached in memory.
 
-You can use `com.davideicardi.kaa.KaaSchemaRegistryAdmin` to programmatically create Kafka's schema topic.
+You can use `kaa.schemaregistry.KaaSchemaRegistryAdmin` to programmatically create Kafka's schema topic.
 NOTE: if you want to create the topic manually, remember to put cleanup policy to `compact` to maintain all the schemas.
 
 ## Why
