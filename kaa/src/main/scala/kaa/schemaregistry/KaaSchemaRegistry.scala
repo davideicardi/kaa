@@ -1,29 +1,27 @@
 package kaa.schemaregistry
 
 import java.lang
-
 import org.apache.avro.Schema
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import org.apache.avro.SchemaNormalization
 import org.apache.kafka.clients.consumer.KafkaConsumer
+
 import java.util.{Collections, Properties, UUID}
 import java.time.{Duration => JavaDuration}
-
 import com.github.blemale.scaffeine.{Cache, Scaffeine}
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.{LongDeserializer, StringDeserializer}
 import org.apache.kafka.common.serialization.{LongSerializer, StringSerializer}
+import org.apache.kafka.clients.CommonClientConfigs
 
-import scala.concurrent.duration._
 import kaa.schemaregistry.utils.Retry
-import java.util.concurrent.atomic.AtomicBoolean
-
+import kaa.schemaregistry.utils.RetryConfig
 import kaa.schemaregistry.KaaSchemaRegistry._
 
+import scala.concurrent.duration._
+import java.util.concurrent.atomic.AtomicBoolean
 import scala.concurrent._
-import kaa.schemaregistry.utils.RetryConfig
-import org.apache.kafka.clients.CommonClientConfigs
 
 object KaaSchemaRegistry {
   val DEFAULT_TOPIC_NAME = "schemas-v1"
