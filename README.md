@@ -5,18 +5,19 @@
 (Kafka Avro4s Schema Registry)
 
 Scala client library that provide an Avro schema registry with Kafka persistency and [Avro4s](https://github.com/sksamuel/avro4s) serializer support.
-It allows resolving AVRO schemas across multiple applications without third party software (it can replace [Confluent Schema Registry](https://github.com/confluentinc/schema-registry)). You can use this library with your Kafka client app without calling an external service for schema resolution.
+It allows resolving AVRO schemas across multiple applications without calling an external software (it can replace [Confluent Schema Registry](https://github.com/confluentinc/schema-registry)).
 
-For serialization [Single object AVRO encoding](https://avro.apache.org/docs/current/spec.html#single_object_encoding) is used to reduce records size, only a schema id (hash) is persisted within the record.  
+For serialization [Single object AVRO encoding](https://avro.apache.org/docs/current/spec.html#single_object_encoding) is used to reduce records size, only a schema id (hash) is persisted within the record.
+Thanks to Avro4s all Scala case classes can be automatically serialized and deserialized. 
 
 ## Features
 
-Kaa provides essentially 3 features:
+Kaa provides essentially these features:
 
 - `kaa.schemaregistry.KaaSchemaRegistry`: a simple embeddable schema registry that read and write schemas to Kafka
 - `kaa.schemaregistry.avro.AvroSingleObjectSerializer[T]`: an avro serializer/deserializer for case classes, based on Avro4s, that internally uses `KaaSchemaRegistry` for schema resolution
 - `kaa.schemaregistry.avro.GenericAvroSingleObjectSerializer`: an avro serializer/deserializer for `GenericRecord` classes that internally uses `KaaSchemaRegistry` for schema resolution
-- `kaa.schemaregistry.kafka.GenericSerde[T]` an implementation of Kafka's `Serde[T]` based on `AvroSingleObjectSerializer`, that can be used with Kafka Stream
+- `kaa.schemaregistry.kafka.KaaSerde[T]` an implementation of Kafka's `Serde[T]` based on `AvroSingleObjectSerializer`, that can be used with Kafka Stream
 
 During serialization a schema hash is generated and stored inside Kafka with the schema (key=hash, value=schema).
 When deserializing the schema is retrieved from Kafka and used for the deserialization.
@@ -27,7 +28,9 @@ NOTE: if you want to create the topic manually, remember to put cleanup policy t
 
 ## Why
 
-The main advantage of Kaa is that it doesn't require an external services to retrieve schemas. This library automatically reads and writes to Kafka. This can simplify installation and configuration of client applications. This is especially useful for applications that already interact with Kafka.
+The main advantage of Kaa is that it doesn't require an external services to retrieve schemas. 
+This library automatically reads and writes to Kafka. This can simplify installation and configuration of client applications
+and it is especially useful for applications that already interact with Kafka.
 
 Confluent Schema Registry on the other end requires you to install a dedicated service.
 
@@ -54,7 +57,7 @@ externalResolvers += Resolver.sonatypeRepo("snapshots")
 // externalResolvers += Resolver.sonatypeRepo("public") // for official releases
 ```
 
-Using `AvroSingleObjectSerializer`:
+### Using `AvroSingleObjectSerializer` directly
 
 ```scala
 // create the topic
@@ -79,6 +82,28 @@ try {
 
 case class SuperheroV1(name: String)
 ```
+
+### Kafka usage
+
+All you have to do is to import `KaaSerde` and add an implicit `SchemaRegistry`.
+
+```scala
+// Import the serializer
+import kaa.schemaregistry.kafka.KaaSerde._
+// Import scala implicit conversions
+import org.apache.kafka.streams.scala.ImplicitConversions._
+
+// Define an implicit schema registry
+implicit val schemaRegistry: SchemaRegistry = new KaaSchemaRegistry(brokers)
+```
+
+After that you can directly define your case classes and use Kafka Streams functions, like:
+
+```scala
+streamsBuilder.stream[TKey, TValue]("topicName")
+```
+
+For a complete example see [es4kafka](https://github.com/davideicardi/es4kafka).
 
 ## Http schema server
 
