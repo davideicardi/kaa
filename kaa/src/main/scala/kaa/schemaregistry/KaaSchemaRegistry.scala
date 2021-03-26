@@ -17,6 +17,7 @@ import org.apache.kafka.clients.CommonClientConfigs
 import kaa.schemaregistry.utils.Retry
 import kaa.schemaregistry.utils.RetryConfig
 import kaa.schemaregistry.KaaSchemaRegistry._
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.duration._
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
@@ -39,13 +40,23 @@ object KaaSchemaRegistry {
   }
 }
 
+/**
+ * Create a new instance of the Schema Registry. Call `start` to connect to Kafka (consumer and producer) and
+ * start reading available schemas.
+ * @param producerProps Kafka Producer properties
+ * @param consumerProps Kafka Consumer properties
+ * @param onError Callback executed when there is a background error. You should usually log, close and start again the instance.
+ * @param topic Topic where to read and write schemas
+ * @param pollInterval Interval used to read schemas
+ * @param getRetry Get retry configurations
+ */
 class KaaSchemaRegistry(
                          producerProps: Properties,
                          consumerProps: Properties,
+                         onError: Exception => Unit,
                          topic: String = DEFAULT_TOPIC_NAME,
                          pollInterval: Duration = DEFAULT_POLL_INTERVAL,
                          getRetry: RetryConfig = DEFAULT_RETRY_CONFIG,
-                         onError: Exception => Unit
                        ) extends SchemaRegistry {
 
   def this(producerProps: Properties,
@@ -55,10 +66,10 @@ class KaaSchemaRegistry(
     this(
       producerProps = producerProps,
       consumerProps = consumerProps,
+      onError,
       topic = DEFAULT_TOPIC_NAME,
       pollInterval = DEFAULT_POLL_INTERVAL,
       getRetry = DEFAULT_RETRY_CONFIG,
-      onError,
     )
   }
 
@@ -70,21 +81,26 @@ class KaaSchemaRegistry(
     )
   }
 
+  private val logger: Logger = LoggerFactory.getLogger(this.getClass.getSimpleName)
   private val cache: Cache[Long, String] = Scaffeine().build[Long, String]()
   private val stopping = new AtomicBoolean(false)
-  private val producer = new AtomicReference[Option[KaaProducer]]
-  private val consumer = new AtomicReference[Option[KaaConsumer]]
+  private val producer = new AtomicReference[Option[KaaProducer]](None)
+  private val consumer = new AtomicReference[Option[KaaConsumer]](None)
 
   def start()(implicit ec: ExecutionContext): Unit = {
-    if (!stopping.get())
+    logger.debug("Starting ...")
+
+    if (stopping.get())
       throw InvalidStateException("Schema registry is stopping")
-    if (!producer.compareAndSet(None, Some(new KaaProducer())))
-      throw InvalidStateException("Schema registry already started")
     if (!consumer.compareAndSet(None, Some(new KaaConsumer())))
-      throw InvalidStateException("Schema registry already started")
+      throw InvalidStateException("Schema registry consumer already created")
+    if (!producer.compareAndSet(None, Some(new KaaProducer())))
+      throw InvalidStateException("Schema registry producer already created")
   }
 
   def close(maxWait: Duration = 10.seconds): Unit = {
+    logger.debug("Closing ...")
+
     stopping.set(true)
     consumer.getAndSet(None) match {
       case Some(c) => c.close(maxWait)
@@ -121,9 +137,11 @@ class KaaSchemaRegistry(
         consumer.subscribe(Collections.singletonList(topic))
         val jPollInterval = JavaDuration.ofMillis(pollInterval.toMillis)
         while (!stopping.get()) {
+          logger.debug(s"Polling from topic $topic")
           val records = consumer.poll(jPollInterval)
 
           records.forEach(record => {
+            logger.debug(s"Found schema ${record.key()}")
             cache.put(record.key(), record.value())
           })
         }
@@ -143,7 +161,6 @@ class KaaSchemaRegistry(
     }
 
     protected def fillConsumerProps(): Properties = {
-
       consumerProps.putIfAbsent(ConsumerConfig.CLIENT_ID_CONFIG, KaaSchemaRegistry.DEFAULT_CLIENT_ID)
 
       consumerProps.put(ConsumerConfig.GROUP_ID_CONFIG, UUID.randomUUID().toString)
@@ -168,6 +185,8 @@ class KaaSchemaRegistry(
       val fingerprint = SchemaNormalization.parsingFingerprint64(schema)
 
       if (cache.getIfPresent(fingerprint).isEmpty) {
+        logger.debug(s"Writing schema $fingerprint to $topic")
+
         val record = new ProducerRecord[java.lang.Long, String](topic, fingerprint, schema.toString())
         producer.send(record).get()
       }

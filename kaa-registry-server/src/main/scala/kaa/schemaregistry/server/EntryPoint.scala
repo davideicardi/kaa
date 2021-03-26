@@ -28,7 +28,12 @@ object EntryPoint extends App {
 
   val doneSignal = new CountDownLatch(1)
 
-  val schemaRegistry = new KaaSchemaRegistry(brokers)
+  def onError(ex: Exception): Unit = {
+    println(ex)
+    doneSignal.countDown()
+  }
+
+  val schemaRegistry = new KaaSchemaRegistry(brokers, onError)
   try {
     val controller = new KaaController(schemaRegistry)
 
@@ -42,10 +47,11 @@ object EntryPoint extends App {
 
     Runtime.getRuntime.addShutdownHook(new Thread(() => {
       doneSignal.countDown()
-      httpServer.stop()
     }))
 
     doneSignal.await()
+
+    httpServer.stop()
   } finally {
     schemaRegistry.close()
   }

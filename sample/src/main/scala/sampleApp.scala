@@ -2,6 +2,8 @@ import kaa.schemaregistry.avro.{AvroSingleObjectEncoding, AvroSingleObjectSerial
 import kaa.schemaregistry.KaaSchemaRegistry
 import kaa.schemaregistry.KaaSchemaRegistryAdmin
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 object SampleApp {
     
     def main(args: Array[String]): Unit = {
@@ -16,8 +18,10 @@ object SampleApp {
             admin.close()
         }
 
-        val schemaRegistry = new KaaSchemaRegistry(brokers)
+        val schemaRegistry = new KaaSchemaRegistry(brokers, e => println(e))
         try {
+            schemaRegistry.start()
+
             val serializerV1 = new AvroSingleObjectSerializer[SuperheroV1](schemaRegistry)
             val serializerV2 = new AvroSingleObjectSerializer[SuperheroV2](schemaRegistry)
 
