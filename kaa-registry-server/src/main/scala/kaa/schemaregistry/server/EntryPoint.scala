@@ -35,6 +35,7 @@ object EntryPoint extends App {
 
   val schemaRegistry = new KaaSchemaRegistry(brokers, onError)
   try {
+    schemaRegistry.start()
     val controller = new KaaController(schemaRegistry)
 
     val httpServer = new KaaHttpServer(

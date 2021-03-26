@@ -57,30 +57,52 @@ externalResolvers += Resolver.sonatypeRepo("snapshots")
 // externalResolvers += Resolver.sonatypeRepo("public") // for official releases
 ```
 
-### Using `AvroSingleObjectSerializer` directly
+### Create the schema topic
+
+You can use `KaaSchemaRegistryAdmin` to create the Kafka topic to store schema the first time.
 
 ```scala
 // create the topic
 val admin = new KaaSchemaRegistryAdmin(brokers)
-if (!admin.topicExists()) admin.createTopic()
-
-// create the schema registry
-val schemaRegistry = new KaaSchemaRegistry(brokers)
 try {
-    // create the serializer
-    val serializerV1 = new AvroSingleObjectSerializer[SuperheroV1](schemaRegistry)
-
-    // serialize
-    val bytesV1 = serializerV1.serialize(SuperheroV1("Spiderman"))
-
-    // deserialize
-    val result = serializerV1.deserialize(bytesV1)
-    println(result)
+  if (!admin.topicExists()) admin.createTopic()
 } finally {
-    schemaRegistry.shutdown()
+  admin.close()
 }
+```
 
+### Setup the schema registry
+
+Just create an instance of `KaaSchemaRegistry` and call the `start` function.
+Remember to close it calling `close` at the end.
+
+```scala
+// create the schema registry
+val schemaRegistry = new KaaSchemaRegistry(brokers, e => println(e))
+try {
+  schemaRegistry.start()
+
+  // put your code here
+  
+} finally {
+  schemaRegistry.close()
+}
+```
+
+### Using `AvroSingleObjectSerializer` directly
+
+```scala
 case class SuperheroV1(name: String)
+
+// given a schema registry
+val schemaRegistry: KaaSchemaRegistry = ???
+
+// create the serializer
+val serializerV1 = new AvroSingleObjectSerializer[SuperheroV1](schemaRegistry)
+// serialize
+val bytesV1 = serializerV1.serialize(SuperheroV1("Spiderman"))
+// deserialize
+val result = serializerV1.deserialize(bytesV1)
 ```
 
 ### Kafka usage
@@ -94,7 +116,7 @@ import kaa.schemaregistry.kafka.KaaSerde._
 import org.apache.kafka.streams.scala.ImplicitConversions._
 
 // Define an implicit schema registry
-implicit val schemaRegistry: SchemaRegistry = new KaaSchemaRegistry(brokers)
+implicit val schemaRegistry: SchemaRegistry = ???
 ```
 
 After that you can directly define your case classes and use Kafka Streams functions, like:
