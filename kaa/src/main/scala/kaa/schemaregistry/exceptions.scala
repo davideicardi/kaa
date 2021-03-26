@@ -1,6 +1,8 @@
 package kaa.schemaregistry
 
 
-class InvalidSchemaException(s:String) extends Exception(s){}
+case class InvalidSchemaException(msg: String) extends Exception(msg)
 
-class SchemaNotFoundException(s:String) extends Exception(s){}
+case class SchemaNotFoundException(msg: String) extends Exception(msg)
+
+case class InvalidStateException(msg: String) extends Exception(msg)

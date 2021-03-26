@@ -5,7 +5,13 @@ import kaa.schemaregistry.SchemaRegistry
 import kaa.schemaregistry.avro.AvroSingleObjectSerializer
 import org.apache.kafka.common.serialization.{Deserializer, Serde, Serializer}
 
-class GenericSerde[T >: Null : SchemaFor : Encoder : Decoder]
+object KaaSerde {
+  implicit def create[T >: Null : SchemaFor : Encoder : Decoder](implicit sr: SchemaRegistry): Serde[T] = {
+    new KaaSerde(sr)
+  }
+}
+
+class KaaSerde[T >: Null : SchemaFor : Encoder : Decoder]
 (schemaManager: SchemaRegistry)
   extends Serde[T]
     with Deserializer[T]
