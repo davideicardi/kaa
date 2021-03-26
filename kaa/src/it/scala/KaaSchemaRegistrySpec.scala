@@ -28,7 +28,7 @@ class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with Before
   }
 
   override protected def afterAll(): Unit = {
-    // admin.deleteTopic()
+    admin.deleteTopic()
   }
 
   "KaaSchemaRegistry" should "create" in {

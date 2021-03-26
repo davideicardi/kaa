@@ -110,7 +110,7 @@ class KaaSchemaRegistry(
       case Some(p) => p.close(maxWait)
       case None =>
     }
-    cache.cleanUp()
+    cache.invalidateAll()
     stopping.set(false)
   }
 
@@ -139,7 +139,6 @@ class KaaSchemaRegistry(
         while (!stopping.get()) {
           logger.debug(s"Polling from topic $topic")
           val records = consumer.poll(jPollInterval)
-
           records.forEach(record => {
             logger.debug(s"Found schema ${record.key()}")
             cache.put(record.key(), record.value())
