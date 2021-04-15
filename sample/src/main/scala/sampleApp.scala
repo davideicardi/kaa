@@ -18,9 +18,9 @@ object SampleApp {
             admin.close()
         }
 
-        val schemaRegistry = new KaaSchemaRegistry(brokers, e => println(e))
+        val schemaRegistry = new KaaSchemaRegistry(brokers)
         try {
-            schemaRegistry.start()
+            schemaRegistry.start(e => println(e))
 
             val serializerV1 = new AvroSingleObjectSerializer[SuperheroV1](schemaRegistry)
             val serializerV2 = new AvroSingleObjectSerializer[SuperheroV2](schemaRegistry)

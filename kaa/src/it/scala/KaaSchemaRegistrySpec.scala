@@ -5,10 +5,11 @@ import org.scalatest._
 import org.scalatest.flatspec._
 import org.scalatest.matchers._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success, Try}
 
 class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with BeforeAndAfterAll {
+
+  import scala.concurrent.ExecutionContext.Implicits.global
 
   private val BROKERS = "localhost:9092"
   private val TOPIC_NAME = "schema-registry-test" + UUID.randomUUID().toString
@@ -19,7 +20,7 @@ class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with Before
   )
 
   private def createTarget() = {
-    new KaaSchemaRegistry(props, props, ex => println(ex), topic = TOPIC_NAME)
+    new KaaSchemaRegistry(props, props, topic = TOPIC_NAME)
   }
 
   override protected def beforeAll(): Unit = {
@@ -57,7 +58,7 @@ class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with Before
   it should "put and get a schema" in {
     val target = createTarget()
     try {
-      target.start()
+      target.start(ex => println(ex))
 
       val schema = AvroSchema[Foo]
       val schemaId = target.put(schema)
@@ -74,7 +75,7 @@ class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with Before
   it should "put and get a schema then close and start again" in {
     val target = createTarget()
     try {
-      target.start()
+      target.start(ex => println(ex))
 
       val schema = AvroSchema[Foo]
       val schemaId = target.put(schema)
@@ -90,7 +91,7 @@ class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with Before
         case None => succeed
       }
 
-      target.start()
+      target.start(ex => println(ex))
       target.get(schemaId) match {
         case Some(schemaRetrieved) => schemaRetrieved should be (schema)
         case None => fail("Schema not found")
@@ -104,7 +105,7 @@ class KaaSchemaRegistrySpec extends AnyFlatSpec with should.Matchers with Before
   it should "return None for not existing schema" in {
     val target = createTarget()
     try {
-      target.start()
+      target.start(ex => println(ex))
 
       target.get(SchemaId(999L)) match {
         case Some(_) => fail("Schema should not be retrieved")

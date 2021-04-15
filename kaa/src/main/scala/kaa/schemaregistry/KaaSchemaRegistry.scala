@@ -53,7 +53,6 @@ object KaaSchemaRegistry {
 class KaaSchemaRegistry(
                          producerProps: Properties,
                          consumerProps: Properties,
-                         onError: Exception => Unit,
                          topic: String = DEFAULT_TOPIC_NAME,
                          pollInterval: Duration = DEFAULT_POLL_INTERVAL,
                          getRetry: RetryConfig = DEFAULT_RETRY_CONFIG,
@@ -61,23 +60,20 @@ class KaaSchemaRegistry(
 
   def this(producerProps: Properties,
            consumerProps: Properties,
-           onError: Exception => Unit,
           ) = {
     this(
       producerProps = producerProps,
       consumerProps = consumerProps,
-      onError,
       topic = DEFAULT_TOPIC_NAME,
       pollInterval = DEFAULT_POLL_INTERVAL,
       getRetry = DEFAULT_RETRY_CONFIG,
     )
   }
 
-  def this(brokers: String, onError: Exception => Unit) = {
+  def this(brokers: String) = {
     this(
       producerProps = createProps(brokers),
       consumerProps = createProps(brokers),
-      onError,
     )
   }
 
@@ -87,12 +83,19 @@ class KaaSchemaRegistry(
   private val producer = new AtomicReference[Option[KaaProducer]](None)
   private val consumer = new AtomicReference[Option[KaaConsumer]](None)
 
-  def start()(implicit ec: ExecutionContext): Unit = {
+  /**
+   * Connect to kafka and start consuming messages. Also start the producer.
+   * @param onError function executed in case of background error inside the consumer. Stop the application and retry in case of errors.
+   * @param ec execution context used for the background consumer
+   */
+  def start(
+             onError: Exception => Unit,
+           )(implicit ec: ExecutionContext): Unit = {
     logger.debug("Starting ...")
 
     if (stopping.get())
       throw InvalidStateException("Schema registry is stopping")
-    if (!consumer.compareAndSet(None, Some(new KaaConsumer())))
+    if (!consumer.compareAndSet(None, Some(new KaaConsumer(onError))))
       throw InvalidStateException("Schema registry consumer already created")
     if (!producer.compareAndSet(None, Some(new KaaProducer())))
       throw InvalidStateException("Schema registry producer already created")
@@ -128,7 +131,9 @@ class KaaSchemaRegistry(
     }
   }
 
-  class KaaConsumer()(implicit ec: ExecutionContext) {
+  class KaaConsumer(
+                     onError: Exception => Unit,
+                   )(implicit ec: ExecutionContext) {
     private val consumer = createConsumer()
     private val startConsumerFuture = startConsumer()
 
