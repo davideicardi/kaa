@@ -1,41 +1,40 @@
 package kaa.schemaregistry.avro
 
-import java.io.ByteArrayOutputStream
-
 import com.sksamuel.avro4s._
 import org.apache.avro._
+import org.apache.avro.generic.{GenericDatumReader, GenericDatumWriter}
+import org.apache.avro.io.{DecoderFactory, EncoderFactory}
 
-class AvroBinarySerializer[T >: Null : SchemaFor : Encoder : Decoder] {
+import java.io.ByteArrayOutputStream
+
+class AvroBinarySerializer[T : SchemaFor : Encoder : Decoder] {
+
   val currentSchema: Schema = AvroSchema[T]
+  private val avroDecoder = Decoder[T]
+  private val avroEncoder = Encoder[T]
+  private val datumWriter = new GenericDatumWriter[AnyRef](currentSchema)
 
   def write(value: T): Array[Byte] = {
     val stream = new ByteArrayOutputStream()
 
-    val output = AvroOutputStream.binary[T]
-      .to(stream)
-      .build()
-
     try {
-      output.write(value)
-      output.flush()
+      val binaryEncoder = EncoderFactory.get().binaryEncoder(stream, null)
+      val datum = avroEncoder.encode(value)
+      datumWriter.write(datum, binaryEncoder)
+      binaryEncoder.flush()
+      stream.flush()
     } finally {
-      output.close()
+      stream.close()
     }
 
     stream.toByteArray
   }
 
   def read(value: Array[Byte], writerSchema: Schema): T = {
-    val input = AvroInputStream.binary[T]
-      .from(value)
-      .build(writerSchema)
+    val datumReader = new GenericDatumReader[Any](writerSchema, currentSchema)
+    val binaryDecoder = DecoderFactory.get().binaryDecoder(value, null)
 
-    try {
-      input.iterator
-        .toSeq
-        .head
-    } finally {
-      input.close()
-    }
+    val datum = datumReader.read(null, binaryDecoder)
+    avroDecoder.decode(datum)
   }
 }
