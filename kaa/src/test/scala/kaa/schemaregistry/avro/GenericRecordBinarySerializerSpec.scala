@@ -5,8 +5,8 @@ import org.apache.avro.generic.GenericData
 import org.scalatest.flatspec._
 import org.scalatest.matchers._
 
-class GenericAvroBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
-  val target = new GenericAvroBinarySerializer()
+class GenericRecordBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
+  val target = new GenericRecordBinarySerializer()
 
   private val schemaV1 = new Schema.Parser().parse(
     """
@@ -39,7 +39,7 @@ class GenericAvroBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
     val record = new GenericData.Record(schemaV1)
     record.put("name", "foo")
 
-    val result = target.write(record)
+    val result = target.serialize(record)
 
     val expected = Array("06", "66", "6f", "6f") // contains a string "foo"
       .map(Integer.parseInt(_, 16).toByte)
@@ -52,7 +52,7 @@ class GenericAvroBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
     record.put("name", "foo")
     record.put("age", 1)
 
-    val result = target.write(record)
+    val result = target.serialize(record)
 
     val expected = Array("06", "66", "6f", "6f", "02") // contains a string "foo" and a long "1"
       .map(Integer.parseInt(_, 16).toByte)
@@ -65,7 +65,7 @@ class GenericAvroBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
       .map(Integer.parseInt(_, 16).toByte)
       .toArray
 
-    val result = target.read(input, schemaV1)
+    val result = target.deserialize(input, schemaV1)
 
     result.get("name").toString should equal ("foo")
   }
@@ -75,7 +75,7 @@ class GenericAvroBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
       .map(Integer.parseInt(_, 16).toByte)
       .toArray
 
-    val result = target.read(input, schemaV1, Some(schemaV2))
+    val result = target.deserialize(input, schemaV1, Some(schemaV2))
 
     result.get("name").toString should equal ("foo")
     result.get("age") should equal (25) // default value
@@ -86,7 +86,7 @@ class GenericAvroBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
       .map(Integer.parseInt(_, 16).toByte)
       .toArray
 
-    val result = target.read(input, schemaV2)
+    val result = target.deserialize(input, schemaV2)
 
     result.get("name").toString should equal ("foo")
   }

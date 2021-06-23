@@ -1,19 +1,19 @@
 package kaa.schemaregistry.kafka
 
 import kaa.schemaregistry.SchemaRegistry
-import kaa.schemaregistry.avro.GenericAvroSingleObjectSerializer
+import kaa.schemaregistry.avro.GenericRecordSingleObjectSerializer
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.common.serialization._
 
 
-class KaaGenericSerde
+class KaaGenericRecordSerde
 (schemaManager: SchemaRegistry)
   extends Serde[GenericRecord]
     with Deserializer[GenericRecord]
     with Serializer[GenericRecord]
     with Serializable {
 
-  private val avroSerializer = new GenericAvroSingleObjectSerializer(schemaManager)
+  private val avroSerializer = new GenericRecordSingleObjectSerializer(schemaManager)
 
   def serializer: Serializer[GenericRecord] = this
   def deserializer: Deserializer[GenericRecord] = this

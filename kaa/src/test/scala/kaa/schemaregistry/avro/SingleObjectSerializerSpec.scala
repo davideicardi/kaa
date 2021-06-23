@@ -12,12 +12,12 @@ import java.util.UUID
 
 case class Pokemon(name: String, mainType: String, offType: Option[String], level: Int)
 
-class AvroSingleObjectSerializerSpec extends AnyFlatSpec with should.Matchers {
+class SingleObjectSerializerSpec extends AnyFlatSpec with should.Matchers {
 
   val registry = new TestSchemaRegistry
 
   "AvroSingleObjectSerializer" should "serialize and deserialize a case class" in {
-    val target = new AvroSingleObjectSerializer[Pokemon](registry)
+    val target = new SingleObjectSerializer[Pokemon](registry)
 
     val expected = Pokemon("Dragonite", "Dragon", None, 100)
     val encoded = target.serialize(expected)
@@ -27,20 +27,20 @@ class AvroSingleObjectSerializerSpec extends AnyFlatSpec with should.Matchers {
   }
 
   it should "serialize a class with a single object encoding" in {
-    val target = new AvroSingleObjectSerializer[Pokemon](registry)
+    val target = new SingleObjectSerializer[Pokemon](registry)
 
     val expected = Pokemon("Dragonite", "Dragon", None, 100)
     val encoded = target.serialize(expected)
 
     val (schemaId, bin) = AvroSingleObjectEncoding.AVRO_OFFICIAL.decode(encoded)
-    val binarySerializer = new AvroBinarySerializer[Pokemon]
+    val binarySerializer = new BinarySerializer[Pokemon]
 
     schemaId should be (AvroUtils.calcFingerprint(AvroSchema[Pokemon]))
-    bin should be (binarySerializer.write(expected))
+    bin should be (binarySerializer.serialize(expected))
   }
 
   it should "serialize and deserialize a primitive type: Long" in {
-    val target = new AvroSingleObjectSerializer[Long](registry)
+    val target = new SingleObjectSerializer[Long](registry)
 
     val expected = 81L
     val encoded = target.serialize(expected)
@@ -53,7 +53,7 @@ class AvroSingleObjectSerializerSpec extends AnyFlatSpec with should.Matchers {
   }
 
   it should "serialize and deserialize a primitive type: String" in {
-    val target = new AvroSingleObjectSerializer[String](registry)
+    val target = new SingleObjectSerializer[String](registry)
 
     val expected = "hello world!"
     val encoded = target.serialize(expected)
@@ -66,7 +66,7 @@ class AvroSingleObjectSerializerSpec extends AnyFlatSpec with should.Matchers {
   }
 
   it should "serialize and deserialize a primitive type: UUID" in {
-    val target = new AvroSingleObjectSerializer[UUID](registry)
+    val target = new SingleObjectSerializer[UUID](registry)
 
     val expected = UUID.randomUUID()
     val encoded = target.serialize(expected)
