@@ -4,7 +4,7 @@ import com.sksamuel.avro4s._
 import kaa.schemaregistry.SchemaRegistry
 import kaa.schemaregistry.SchemaNotFoundException
 
-class AvroSingleObjectSerializer[T >: Null : SchemaFor : Encoder : Decoder]
+class AvroSingleObjectSerializer[T : SchemaFor : Encoder : Decoder]
 (
   schemaRegistry: SchemaRegistry,
   encoding: AvroSingleObjectEncoding = AvroSingleObjectEncoding.AVRO_OFFICIAL
@@ -21,7 +21,7 @@ class AvroSingleObjectSerializer[T >: Null : SchemaFor : Encoder : Decoder]
   def deserialize(bytes: Array[Byte]): T = {
     val (schemaId, serialized) = encoding.decode(bytes)
     val schema = schemaRegistry.get(schemaId)
-      .getOrElse(throw new SchemaNotFoundException(s"Schema $schemaId not found in registry"))
+      .getOrElse(throw SchemaNotFoundException(s"Schema $schemaId not found in registry"))
 
     binarySerializer.read(serialized, schema)
   }

@@ -5,6 +5,8 @@ import org.scalatest._
 import flatspec._
 import matchers._
 
+import java.util.UUID
+
 class AvroBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
 
   "AvroBinarySerializer" should "serialize a case class" in {
@@ -41,7 +43,7 @@ class AvroBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
     result.name should equal ("foo")
   }
 
-  it should "get the current schema" in {
+  it should "get the current schema of a case class" in {
     val target = new AvroBinarySerializer[FooUser]()
 
     val schema = target.currentSchema
@@ -75,6 +77,58 @@ class AvroBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
     val result = target.read(input, AvroSchema[FooUserV2])
 
     result.name should equal ("foo")
+  }
+
+  it should "serialize and deserialize primitive type: string" in {
+    val target = new AvroBinarySerializer[String]()
+
+    target.currentSchema.toString() should be ("\"string\"")
+
+    val expected = "foo"
+    val resultBytes = target.write(expected)
+
+    val expectedBytes = Array("06", "66", "6f", "6f") // contains a string "foo"
+      .map(Integer.parseInt(_, 16).toByte)
+
+    resultBytes should equal (expectedBytes)
+
+    val result = target.read(resultBytes, target.currentSchema)
+    result should equal (expected)
+  }
+
+  it should "serialize and deserialize primitive type: long" in {
+    val target = new AvroBinarySerializer[Long]()
+
+    target.currentSchema.toString() should be ("\"long\"")
+
+    val expected = 64L
+    val resultBytes = target.write(expected)
+
+    val expectedBytes = Array("80", "01") // int and long values are written using variable-length zig-zag coding
+      .map(Integer.parseInt(_, 16).toByte)
+
+    resultBytes should equal (expectedBytes)
+
+    val result = target.read(resultBytes, target.currentSchema)
+    result should equal (expected)
+  }
+
+  it should "serialize and deserialize primitive type: UUID" in {
+    val target = new AvroBinarySerializer[UUID]()
+
+    target.currentSchema.toString() should be ("{\"type\":\"string\",\"logicalType\":\"uuid\"}")
+
+    val expected = UUID.fromString("1f04d1f3-2f8c-4743-85c7-9ac02328c32c")
+    val resultBytes = target.write(expected)
+
+    val expectedBytes = Array(
+      72, 49, 102, 48, 52, 100, 49, 102, 51, 45, 50, 102, 56, 99, 45, 52, 55, 52,
+      51, 45, 56, 53, 99, 55, 45, 57, 97, 99, 48, 50, 51, 50, 56, 99, 51, 50, 99)
+
+    resultBytes should equal (expectedBytes)
+
+    val result = target.read(resultBytes, target.currentSchema)
+    result should equal (expected)
   }
 
   case class FooUser (name: String) {

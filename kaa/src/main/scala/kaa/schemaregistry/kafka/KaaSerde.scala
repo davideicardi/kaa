@@ -11,7 +11,7 @@ object KaaSerde {
   }
 }
 
-class KaaSerde[T >: Null : SchemaFor : Encoder : Decoder]
+class KaaSerde[T : SchemaFor : Encoder : Decoder]
 (schemaManager: SchemaRegistry)
   extends Serde[T]
     with Deserializer[T]
@@ -25,7 +25,7 @@ class KaaSerde[T >: Null : SchemaFor : Encoder : Decoder]
 
   override def deserialize(topic: String, data: Array[Byte]): T = {
     if (data == null || data.length == 0) {
-      null
+      null.asInstanceOf[T]
     } else {
       avroSerializer.deserialize(data)
     }
