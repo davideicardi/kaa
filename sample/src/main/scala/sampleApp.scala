@@ -1,4 +1,4 @@
-import kaa.schemaregistry.avro.{AvroSingleObjectEncoding, AvroSingleObjectSerializer}
+import kaa.schemaregistry.avro.{AvroSingleObjectEncoding, SingleObjectSerializer}
 import kaa.schemaregistry.KaaSchemaRegistry
 import kaa.schemaregistry.KaaSchemaRegistryAdmin
 
@@ -22,8 +22,8 @@ object SampleApp {
         try {
             schemaRegistry.start(e => println(e))
 
-            val serializerV1 = new AvroSingleObjectSerializer[SuperheroV1](schemaRegistry)
-            val serializerV2 = new AvroSingleObjectSerializer[SuperheroV2](schemaRegistry)
+            val serializerV1 = new SingleObjectSerializer[SuperheroV1](schemaRegistry)
+            val serializerV2 = new SingleObjectSerializer[SuperheroV2](schemaRegistry)
 
             val bytesV1 = serializerV1.serialize(SuperheroV1("Spiderman"))
             val bytesV2 = serializerV2.serialize(SuperheroV2("Spiderman", "Peter Parker"))

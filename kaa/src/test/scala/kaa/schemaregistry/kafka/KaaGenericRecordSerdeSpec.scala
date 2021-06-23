@@ -1,11 +1,12 @@
 package kaa.schemaregistry.kafka
 
 import kaa.schemaregistry.test.TestSchemaRegistry
+import org.apache.avro.SchemaNormalization
 import org.apache.avro.generic.GenericData
 import org.scalatest.flatspec._
 import org.scalatest.matchers._
 
-class KaaGenericSerdeSpec extends AnyFlatSpec with should.Matchers {
+class KaaGenericRecordSerdeSpec extends AnyFlatSpec with should.Matchers {
 
   private val registry = new TestSchemaRegistry
 
@@ -23,7 +24,7 @@ class KaaGenericSerdeSpec extends AnyFlatSpec with should.Matchers {
     """.stripMargin
 
   "KaaGenericSerde" should "serialize and deserialize a generic record" in {
-    val target = new KaaGenericSerde(registry)
+    val target = new KaaGenericRecordSerde(registry)
 
     val schemaObj = new org.apache.avro.Schema.Parser().parse(schema)
 
@@ -34,8 +35,8 @@ class KaaGenericSerdeSpec extends AnyFlatSpec with should.Matchers {
 
     val bytes = target.serialize("topic", user1)
     val result = target.deserialize("topic", bytes)
-
     result.toString should equal ("{\"name\": \"Alyssa\", \"favorite_number\": 256, \"favorite_color\": \"blue\"}")
+    SchemaNormalization.parsingFingerprint64(result.getSchema) should equal (SchemaNormalization.parsingFingerprint64(schemaObj))
   }
 
 }

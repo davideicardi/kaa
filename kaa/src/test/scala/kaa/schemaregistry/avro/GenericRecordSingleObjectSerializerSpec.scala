@@ -7,11 +7,11 @@ import org.apache.avro.{Schema, SchemaNormalization}
 import org.scalatest.flatspec._
 import org.scalatest.matchers._
 
-class GenericAvroSingleObjectSerializerSpec extends AnyFlatSpec with should.Matchers {
+class GenericRecordSingleObjectSerializerSpec extends AnyFlatSpec with should.Matchers {
 
   val registry = new TestSchemaRegistry
 
-  val singleObjectSerializer = new GenericAvroSingleObjectSerializer(registry)
+  val singleObjectSerializer = new GenericRecordSingleObjectSerializer(registry)
 
   private val schemaV1 = new Schema.Parser().parse(
     """
@@ -68,10 +68,10 @@ class GenericAvroSingleObjectSerializerSpec extends AnyFlatSpec with should.Matc
     val encoded = singleObjectSerializer.serialize(record)
 
     val (schemaId, bin) = AvroSingleObjectEncoding.AVRO_OFFICIAL.decode(encoded)
-    val binarySerializer = new GenericAvroBinarySerializer
+    val binarySerializer = new GenericRecordBinarySerializer
 
     schemaId should be (AvroUtils.calcFingerprint(schemaV1))
-    bin should be (binarySerializer.write(record))
+    bin should be (binarySerializer.serialize(record))
   }
 
   object AvroUtils {

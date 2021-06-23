@@ -5,21 +5,20 @@
 (Kafka Avro4s Schema Registry)
 
 Scala client library that provide an Avro schema registry with Kafka persistency and [Avro4s](https://github.com/sksamuel/avro4s) serializer support.
-It allows resolving AVRO schemas across multiple applications without calling an external software (it can replace [Confluent Schema Registry](https://github.com/confluentinc/schema-registry)).
+It allows resolving AVRO schemas across multiple applications. It can be used instead of [Confluent Schema Registry](https://github.com/confluentinc/schema-registry).
 
-For serialization [Single object AVRO encoding](https://avro.apache.org/docs/current/spec.html#single_object_encoding) is used to reduce records size, only a schema id (hash) is persisted within the record.
-Thanks to Avro4s all Scala case classes can be automatically serialized and deserialized. 
+For serialization, [Single object AVRO encoding](https://avro.apache.org/docs/current/spec.html#single_object_encoding) is used, where only a schema id (hash) is persisted within the record.
+Thanks to Avro4s, all Scala case classes and primitive types can be serialized and deserialized. 
 
 ## Features
 
-Kaa provides essentially these features:
-
 - `kaa.schemaregistry.KaaSchemaRegistry`: a simple embeddable schema registry that read and write schemas to Kafka
-- `kaa.schemaregistry.avro.AvroSingleObjectSerializer[T]`: an avro serializer/deserializer for case classes, based on Avro4s, that internally uses `KaaSchemaRegistry` for schema resolution
-- `kaa.schemaregistry.avro.GenericAvroSingleObjectSerializer`: an avro serializer/deserializer for `GenericRecord` classes that internally uses `KaaSchemaRegistry` for schema resolution
-- `kaa.schemaregistry.kafka.KaaSerde[T]` an implementation of Kafka's `Serde[T]` based on `AvroSingleObjectSerializer`, that can be used with Kafka Stream
+- `kaa.schemaregistry.avro.SingleObjectSerializer[T]`: an avro serializer/deserializer for case classes, based on Avro4s, that internally uses `KaaSchemaRegistry` for schema resolution
+- `kaa.schemaregistry.avro.GenericRecordSingleObjectSerializer`: an avro serializer/deserializer for `GenericRecord` classes that internally uses `KaaSchemaRegistry` for schema resolution
+- `kaa.schemaregistry.kafka.KaaSerde[T]`: an implementation of Kafka's `Serde[T]` based on `SingleObjectSerializer`, that can be used with Kafka Stream
+- `kaa.schemaregistry.kafka.KaaGenericRecordSerde[T]`: an implementation of Kafka's `Serde[T]` based on `GenericRecordSingleObjectSerializer`, that can be used with Kafka Stream
 
-During serialization a schema hash is generated and stored inside Kafka with the schema (key=hash, value=schema).
+During serialization, a schema hash is generated and stored inside Kafka with the schema (key=hash, value=schema).
 When deserializing the schema is retrieved from Kafka and used for the deserialization.
 `KaaSchemaRegistry` internally runs a Kafka consumer to read all schemas that will be cached in memory.
 
@@ -89,7 +88,7 @@ try {
 }
 ```
 
-### Using `AvroSingleObjectSerializer` directly
+### Using `SingleObjectSerializer` directly
 
 ```scala
 case class SuperheroV1(name: String)
@@ -98,7 +97,7 @@ case class SuperheroV1(name: String)
 val schemaRegistry: KaaSchemaRegistry = ???
 
 // create the serializer
-val serializerV1 = new AvroSingleObjectSerializer[SuperheroV1](schemaRegistry)
+val serializerV1 = new SingleObjectSerializer[SuperheroV1](schemaRegistry)
 // serialize
 val bytesV1 = serializerV1.serialize(SuperheroV1("Spiderman"))
 // deserialize

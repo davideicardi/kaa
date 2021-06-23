@@ -2,7 +2,7 @@ package kaa.schemaregistry.kafka
 
 import com.sksamuel.avro4s.{Decoder, Encoder, SchemaFor}
 import kaa.schemaregistry.SchemaRegistry
-import kaa.schemaregistry.avro.AvroSingleObjectSerializer
+import kaa.schemaregistry.avro.SingleObjectSerializer
 import org.apache.kafka.common.serialization.{Deserializer, Serde, Serializer}
 
 object KaaSerde {
@@ -18,7 +18,7 @@ class KaaSerde[T : SchemaFor : Encoder : Decoder]
     with Serializer[T]
     with Serializable {
 
-  private val avroSerializer = new AvroSingleObjectSerializer[T](schemaManager)
+  private val avroSerializer = new SingleObjectSerializer[T](schemaManager)
 
   def serializer: Serializer[T] = this
   def deserializer: Deserializer[T] = this

@@ -7,12 +7,12 @@ import matchers._
 
 import java.util.UUID
 
-class AvroBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
+class BinarySerializerSpec extends AnyFlatSpec with should.Matchers {
 
   "AvroBinarySerializer" should "serialize a case class" in {
-    val target = new AvroBinarySerializer[FooUser]()
+    val target = new BinarySerializer[FooUser]()
 
-    val result = target.write(FooUser("foo"))
+    val result = target.serialize(FooUser("foo"))
 
     val expected = Array("06", "66", "6f", "6f") // contains a string "foo"
       .map(Integer.parseInt(_, 16).toByte)
@@ -21,9 +21,9 @@ class AvroBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
   }
 
   it should "serialize a case class V2" in {
-    val target = new AvroBinarySerializer[FooUserV2]()
+    val target = new BinarySerializer[FooUserV2]()
 
-    val result = target.write(FooUserV2("foo", 1))
+    val result = target.serialize(FooUserV2("foo", 1))
 
     val expected = Array("06", "66", "6f", "6f", "02") // contains a string "foo" and a long "1"
       .map(Integer.parseInt(_, 16).toByte)
@@ -32,94 +32,94 @@ class AvroBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
   }
 
   it should "deserialize a case class" in {
-    val target = new AvroBinarySerializer[FooUser]()
+    val target = new BinarySerializer[FooUser]()
 
     val input = Seq("06", "66", "6f", "6f") // contains a string "foo"
       .map(Integer.parseInt(_, 16).toByte)
       .toArray
 
-    val result = target.read(input, target.currentSchema)
+    val result = target.deserialize(input, target.currentSchema)
 
     result.name should equal ("foo")
   }
 
   it should "get the current schema of a case class" in {
-    val target = new AvroBinarySerializer[FooUser]()
+    val target = new BinarySerializer[FooUser]()
 
     val schema = target.currentSchema
 
     //noinspection ScalaStyle
-    val expectedSchema = """{"type":"record","name":"FooUser","namespace":"kaa.schemaregistry.avro.AvroBinarySerializerSpec","fields":[{"name":"name","type":"string"}]}"""
+    val expectedSchema = """{"type":"record","name":"FooUser","namespace":"kaa.schemaregistry.avro.BinarySerializerSpec","fields":[{"name":"name","type":"string"}]}"""
 
     schema.toString(false) should be (expectedSchema)
   }
 
   it should "deserialize a V1 byte array to V2 case class" in {
-    val target = new AvroBinarySerializer[FooUserV2]()
+    val target = new BinarySerializer[FooUserV2]()
 
     val input = Seq("06", "66", "6f", "6f") // contains a string "foo"
       .map(Integer.parseInt(_, 16).toByte)
       .toArray
 
-    val result = target.read(input, AvroSchema[FooUser])
+    val result = target.deserialize(input, AvroSchema[FooUser])
 
     result.name should equal ("foo")
     result.age should equal (25)
   }
 
   it should "deserialize a V2 byte array to V1 case class" in {
-    val target = new AvroBinarySerializer[FooUser]()
+    val target = new BinarySerializer[FooUser]()
 
     val input = Seq("06", "66", "6f", "6f", "02") // contains a string "foo" and a long "1"
       .map(Integer.parseInt(_, 16).toByte)
       .toArray
 
-    val result = target.read(input, AvroSchema[FooUserV2])
+    val result = target.deserialize(input, AvroSchema[FooUserV2])
 
     result.name should equal ("foo")
   }
 
   it should "serialize and deserialize primitive type: string" in {
-    val target = new AvroBinarySerializer[String]()
+    val target = new BinarySerializer[String]()
 
     target.currentSchema.toString() should be ("\"string\"")
 
     val expected = "foo"
-    val resultBytes = target.write(expected)
+    val resultBytes = target.serialize(expected)
 
     val expectedBytes = Array("06", "66", "6f", "6f") // contains a string "foo"
       .map(Integer.parseInt(_, 16).toByte)
 
     resultBytes should equal (expectedBytes)
 
-    val result = target.read(resultBytes, target.currentSchema)
+    val result = target.deserialize(resultBytes, target.currentSchema)
     result should equal (expected)
   }
 
   it should "serialize and deserialize primitive type: long" in {
-    val target = new AvroBinarySerializer[Long]()
+    val target = new BinarySerializer[Long]()
 
     target.currentSchema.toString() should be ("\"long\"")
 
     val expected = 64L
-    val resultBytes = target.write(expected)
+    val resultBytes = target.serialize(expected)
 
     val expectedBytes = Array("80", "01") // int and long values are written using variable-length zig-zag coding
       .map(Integer.parseInt(_, 16).toByte)
 
     resultBytes should equal (expectedBytes)
 
-    val result = target.read(resultBytes, target.currentSchema)
+    val result = target.deserialize(resultBytes, target.currentSchema)
     result should equal (expected)
   }
 
   it should "serialize and deserialize primitive type: UUID" in {
-    val target = new AvroBinarySerializer[UUID]()
+    val target = new BinarySerializer[UUID]()
 
     target.currentSchema.toString() should be ("{\"type\":\"string\",\"logicalType\":\"uuid\"}")
 
     val expected = UUID.fromString("1f04d1f3-2f8c-4743-85c7-9ac02328c32c")
-    val resultBytes = target.write(expected)
+    val resultBytes = target.serialize(expected)
 
     val expectedBytes = Array(
       72, 49, 102, 48, 52, 100, 49, 102, 51, 45, 50, 102, 56, 99, 45, 52, 55, 52,
@@ -127,7 +127,7 @@ class AvroBinarySerializerSpec extends AnyFlatSpec with should.Matchers {
 
     resultBytes should equal (expectedBytes)
 
-    val result = target.read(resultBytes, target.currentSchema)
+    val result = target.deserialize(resultBytes, target.currentSchema)
     result should equal (expected)
   }
 
