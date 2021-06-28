@@ -131,9 +131,28 @@ class BinarySerializerSpec extends AnyFlatSpec with should.Matchers {
     result should equal (expected)
   }
 
+  it should "serialize and deserialize user defined value type" in {
+    val target = new BinarySerializer[MyValueType]()
+
+    target.currentSchema.toString() should be ("\"string\"")
+
+    val expected = MyValueType("foo")
+    val resultBytes = target.serialize(expected)
+
+    val expectedBytes = Array("06", "66", "6f", "6f") // contains a string "foo"
+      .map(Integer.parseInt(_, 16).toByte)
+
+    resultBytes should equal (expectedBytes)
+
+    val result = target.deserialize(resultBytes, target.currentSchema)
+    result should equal (expected)
+  }
+
   case class FooUser (name: String) {
   }
 
   case class FooUserV2 (name: String, age: Int = 25) {
   }
 }
+
+case class MyValueType(value: String) extends AnyVal
