@@ -3,6 +3,7 @@ package kaa.schemaregistry.avro
 import com.sksamuel.avro4s.AvroSchema
 import org.scalatest._
 import flatspec._
+import kaa.schemaregistry.MyValueType
 import matchers._
 
 import java.util.UUID
@@ -154,5 +155,3 @@ class BinarySerializerSpec extends AnyFlatSpec with should.Matchers {
   case class FooUserV2 (name: String, age: Int = 25) {
   }
 }
-
-case class MyValueType(value: String) extends AnyVal
