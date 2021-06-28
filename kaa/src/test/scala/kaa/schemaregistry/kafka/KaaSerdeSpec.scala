@@ -2,6 +2,7 @@ package kaa.schemaregistry.kafka
 
 import org.scalatest._
 import flatspec._
+import kaa.schemaregistry.MyValueType
 import matchers._
 import kaa.schemaregistry.test.TestSchemaRegistry
 
@@ -96,6 +97,16 @@ class KaaSerdeSpec extends AnyFlatSpec with should.Matchers {
     val target = new KaaSerde[UUID](registry)
     target.deserialize("topic", Array()) should be (null)
     target.deserialize("topic", null) should be (null)
+  }
+
+  it should "serialize and deserialize value type" in {
+    val target = new KaaSerde[MyValueType](registry)
+
+    val expected = MyValueType("hello world")
+    val bytes = target.serialize("topic", expected)
+    val result = target.deserialize("topic", bytes)
+
+    result should equal (expected)
   }
 
   case class FooUser (name: String) {

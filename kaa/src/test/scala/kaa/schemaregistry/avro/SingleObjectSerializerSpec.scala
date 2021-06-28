@@ -4,7 +4,7 @@ import com.sksamuel.avro4s.AvroSchema
 import org.apache.avro.{Schema, SchemaNormalization}
 import org.scalatest._
 import flatspec._
-import kaa.schemaregistry.SchemaId
+import kaa.schemaregistry.{MyValueType, SchemaId}
 import kaa.schemaregistry.test.TestSchemaRegistry
 import matchers._
 
@@ -74,8 +74,21 @@ class SingleObjectSerializerSpec extends AnyFlatSpec with should.Matchers {
     decoded should be (expected)
 
     val (schemaId, _) = AvroSingleObjectEncoding.AVRO_OFFICIAL.decode(encoded)
-    schemaId should be (SchemaId(-8142146995180207161L))
+    schemaId should be (SchemaId(-8142146995180207161L)) // String
     schemaId should be (AvroUtils.calcFingerprint(AvroSchema[UUID]))
+  }
+
+  it should "serialize and deserialize a value type" in {
+    val target = new SingleObjectSerializer[MyValueType](registry)
+
+    val expected = MyValueType("foo-bar")
+    val encoded = target.serialize(expected)
+    val decoded = target.deserialize(encoded)
+    decoded should be (expected)
+
+    val (schemaId, _) = AvroSingleObjectEncoding.AVRO_OFFICIAL.decode(encoded)
+    schemaId should be (SchemaId(-8142146995180207161L)) // String
+    schemaId should be (AvroUtils.calcFingerprint(AvroSchema[MyValueType]))
   }
 
   object AvroUtils {

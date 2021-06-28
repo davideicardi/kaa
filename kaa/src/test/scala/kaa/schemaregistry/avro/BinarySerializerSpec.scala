@@ -3,6 +3,7 @@ package kaa.schemaregistry.avro
 import com.sksamuel.avro4s.AvroSchema
 import org.scalatest._
 import flatspec._
+import kaa.schemaregistry.MyValueType
 import matchers._
 
 import java.util.UUID
@@ -124,6 +125,23 @@ class BinarySerializerSpec extends AnyFlatSpec with should.Matchers {
     val expectedBytes = Array(
       72, 49, 102, 48, 52, 100, 49, 102, 51, 45, 50, 102, 56, 99, 45, 52, 55, 52,
       51, 45, 56, 53, 99, 55, 45, 57, 97, 99, 48, 50, 51, 50, 56, 99, 51, 50, 99)
+
+    resultBytes should equal (expectedBytes)
+
+    val result = target.deserialize(resultBytes, target.currentSchema)
+    result should equal (expected)
+  }
+
+  it should "serialize and deserialize user defined value type" in {
+    val target = new BinarySerializer[MyValueType]()
+
+    target.currentSchema.toString() should be ("\"string\"")
+
+    val expected = MyValueType("foo")
+    val resultBytes = target.serialize(expected)
+
+    val expectedBytes = Array("06", "66", "6f", "6f") // contains a string "foo"
+      .map(Integer.parseInt(_, 16).toByte)
 
     resultBytes should equal (expectedBytes)
 
