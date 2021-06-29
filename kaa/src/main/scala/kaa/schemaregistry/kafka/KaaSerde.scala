@@ -6,7 +6,7 @@ import kaa.schemaregistry.avro.SingleObjectSerializer
 import org.apache.kafka.common.serialization.{Deserializer, Serde, Serializer}
 
 object KaaSerde {
-  implicit def create[T >: Null : SchemaFor : Encoder : Decoder](implicit sr: SchemaRegistry): Serde[T] = {
+  implicit def create[T : SchemaFor : Encoder : Decoder](implicit sr: SchemaRegistry): Serde[T] = {
     new KaaSerde(sr)
   }
 }
